@@ -52,10 +52,16 @@
 - (IBAction)connectBtnClick:(id)sender {
     NSLog(@"connectBtnClick");
     // 1.建立连接
-    //    NSString *host = @"180.150.191.8";
+    
+    [self networkReachability];
+    
+}
+- (void)connectToHost{
+    
+    //    NSString *host = @"106.75.7.156";
     //    int port = 3000;
     
-    NSString *host = @"106.75.7.156";
+    NSString *host = @"180.150.191.8";
     int port = 3000;
     
     // 创建一个Socket对象
@@ -64,12 +70,60 @@
     // 连接
     NSError *error = nil;
     [_socket connectToHost:host onPort:port error:&error];
-    
 }
+
+/**
+ *  网络环境变化判断
+ */
+- (void)networkReachability{
+    //创建网络监听管理者对象
+    AFNetworkReachabilityManager *manager = [AFNetworkReachabilityManager sharedManager];
+    
+    /*
+     typedef NS_ENUM(NSInteger, AFNetworkReachabilityStatus) {
+     AFNetworkReachabilityStatusUnknown          = -1,//未识别的网络
+     AFNetworkReachabilityStatusNotReachable     = 0,//不可达的网络(未连接)
+     AFNetworkReachabilityStatusReachableViaWWAN = 1,//2G,3G,4G...
+     AFNetworkReachabilityStatusReachableViaWiFi = 2,//wifi网络
+     };
+     */
+    //设置监听
+    [manager setReachabilityStatusChangeBlock:^(AFNetworkReachabilityStatus status) {
+        switch (status) {
+            case AFNetworkReachabilityStatusUnknown:
+                NSLog(@"未识别的网络");
+                self.navigationItem.title = @"未识别的网络";
+                break;
+                
+            case AFNetworkReachabilityStatusNotReachable:
+                NSLog(@"不可达的网络(未连接)");
+                self.navigationItem.title = @"网络不可用";
+                [self.socket disconnect];
+                break;
+                
+            case AFNetworkReachabilityStatusReachableViaWWAN:
+                NSLog(@"2G,3G,4G...的网络");
+                [self connectToHost];
+                break;
+                
+            case AFNetworkReachabilityStatusReachableViaWiFi:
+                NSLog(@"wifi的网络");
+                [self connectToHost];
+                break;
+            default:
+                break;
+        }
+    }];
+    //开始监听
+    [manager startMonitoring];
+}
+
 
 - (IBAction)bindBtnClick:(id)sender {
     NSLog(@"bindBtnClick");
     
+    //绑定用户
+    [self.socket writeData:[MessageDataPacketTool bindDataWithUserId:[NSString stringWithFormat:@"%@",@111]] withTimeout:-1 tag:222];
 }
 - (void)touchesBegan:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event{
     [self.messageTextField endEditing:YES];
@@ -89,6 +143,8 @@
 - (BOOL)textFieldShouldReturn:(UITextField *)textField{
     
     NSLog(@"textFieldShouldReturn--%@",textField.text);
+    
+    // 通过http代理发送数据
     [self.messages addObject:textField.text];
     
     NSMutableData *dataaa = [NSMutableData data];
@@ -139,7 +195,7 @@
     NSLog(@"连接主机成功");
     self.socket = sock;
     // 发送协议报文
-    [sock writeData:[MessageDataPacketTool withPacketAndIpBody] withTimeout:-1 tag:222];
+    [sock writeData:[MessageDataPacketTool handshakeMessagePacketData] withTimeout:-1 tag:222];
     
 }
 
@@ -187,8 +243,6 @@
     length = 0;
     _recieveNum = 0;
     
-//   IP_PACKET packet = [MessageDataPacketTool handShakeSuccessResponesWithData:self.messageBodyData];
-    
     IP_PACKET packet ;
     if (self.messageBodyData == nil) {
         //读取到的数据
@@ -204,7 +258,7 @@
     switch (packet.cmd) {
             
         case MpushMessageBodyCMDHandShakeSuccess:
-            
+            NSLog(@"握手成功");
             [self processHandShakeDataWithPacket:packet andData:body_data];
             break;
             
@@ -234,8 +288,8 @@
             [MessageDataPacketTool errorWithBody:body_data];
             break;
         case MpushMessageBodyCMDOk: //ok
-            //            [MessageDataPacketTool okWithBody:body_data];
-            NSLog(@"绑定成功--ok===============");
+            //                        [MessageDataPacketTool okWithBody:body_data];
+            NSLog(@"======绑定成功=========");
             break;
             
         case MpushMessageBodyCMDHttp: // http代理
@@ -243,6 +297,7 @@
             NSLog(@"ok======聊天=========");
             NSData *bodyData = [MessageDataPacketTool processFlagWithPacket:packet andBodyData:body_data];
             HTTP_RESPONES_BODY responesBody = [MessageDataPacketTool chatDataSuccessWithData:bodyData];
+            NSLog(@"--%d",responesBody.statusCode);
         }
             break;
         case MpushMessageBodyCMDPush:  //收到的push消息
@@ -267,7 +322,7 @@
 }
 
 /**
- *  处理收到的 push消息
+ *  处理收到的消息
  *
  *  @param packet    协议包
  *  @param body_data 协议包body data
@@ -300,7 +355,7 @@
     [[NSRunLoop mainRunLoop] addTimer:_timer forMode:NSDefaultRunLoopMode];
     
     //绑定用户
-    [self.socket writeData:[MessageDataPacketTool bindDataWithUserId:[NSString stringWithFormat:@"%@",@111]] withTimeout:-1 tag:222];
+    //    [self.socket writeData:[MessageDataPacketTool bindDataWithUserId:[NSString stringWithFormat:@"%@",@111]] withTimeout:-1 tag:222];
 }
 
 

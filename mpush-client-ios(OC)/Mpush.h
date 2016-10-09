@@ -9,6 +9,8 @@
 #ifndef Mpush_h
 #define Mpush_h
 
+#define appVersion @"9.2.1";
+
 #define BCJUserDefaults  [NSUserDefaults standardUserDefaults]
 #define  BCJIvData @"BCJIvData"
 #define  BCJClientKeyData @"BCJClientKeyData"

@@ -9,7 +9,6 @@
 #import "MessageDataPacketTool.h"
 #import <CommonCrypto/CommonCryptor.h>
 
-#define appVersion @"9.2.1";
 
 @implementation MessageDataPacketTool
 
@@ -29,18 +28,18 @@
  */
 
 + (NSMutableData *)ipHeaderWithLength:(uint32_t)length
-                 cmd:(int8_t)cmd
-                  cc:(int16_t)cc
-               flags:(int8_t)flags
-           sessionId:(uint32_t)sessionId
-                 lrc:(int8_t)lrc{
+                                  cmd:(int8_t)cmd
+                                   cc:(int16_t)cc
+                                flags:(int8_t)flags
+                            sessionId:(uint32_t)sessionId
+                                  lrc:(int8_t)lrc{
     //协议头
     NSMutableData *packetData = [NSMutableData data];
+    RFIWriter *writerPacket = [RFIWriter writerWithData:packetData];
     
     HTONL(length);
-    HTONL(cc);
+    HTONS(cc);
     HTONL(sessionId);
-    RFIWriter *writerPacket = [RFIWriter writerWithData:packetData];
     [writerPacket writeUInt32:length];
     [writerPacket writeByte:cmd];
     [writerPacket writeInt16:cc];
@@ -55,97 +54,65 @@
  *
  *  @return 握手数据data
  */
-+ (NSData *)withPacketAndIpBody {
++ (NSData *)handshakeMessagePacketData {
     //拼接body
     NSMutableData *bodyData = [NSMutableData data];
-    IP_BODY ipBody ;
+    RFIWriter *writerPacket = [RFIWriter writerWithData:bodyData];
+    
     //设备唯一标识
     NSString *identifierForVendor = [[UIDevice currentDevice].identifierForVendor UUIDString];
-    ipBody.deviceId = (char *)identifierForVendor.UTF8String;
-    NSData *deviceData = [identifierForVendor dataUsingEncoding:NSUTF8StringEncoding];
-    short deviceDataLength = (short)deviceData.length;
-    HTONS(deviceDataLength);
-    NSData *deviceLengthData = [NSData dataWithBytes:&deviceDataLength length:sizeof(deviceDataLength)];
-    [bodyData appendData:deviceLengthData];
-    [bodyData appendData:deviceData];
+    [writerPacket writeString:identifierForVendor];
     
     //设备名称
     NSString *iosStr = @"ios";
-    NSData *osNameData =  [iosStr dataUsingEncoding:NSUTF8StringEncoding];
-    short osNameDataLength =(short)osNameData.length;
-    HTONS(osNameDataLength);
-    NSData *osNameLengthData = [NSData dataWithBytes:&osNameDataLength length:sizeof(osNameDataLength)];
-    [bodyData appendData:osNameLengthData];
-    [bodyData appendData:osNameData];
+    [writerPacket writeString:iosStr];
     
     //设备版本号
     NSString *osVersionStr =  appVersion;
-    NSData *osVersionData =  [osVersionStr dataUsingEncoding:NSUTF8StringEncoding];
-    NSLog(@"osVersionData--%@",osVersionData);
-    short osVersionDataLength =(short)osVersionData.length;
-    HTONS(osVersionDataLength);
-    NSData *osVersionLengthData = [NSData dataWithBytes:&osVersionDataLength length:sizeof(osVersionDataLength)];
-    NSLog(@"osVersionLengthData--%@",osVersionLengthData);
-    [bodyData appendData:osVersionLengthData];
-    [bodyData appendData:osVersionData];
+    [writerPacket writeString:osVersionStr];
     
     //app版本号
     NSDictionary *infoDict = [[NSBundle mainBundle] infoDictionary];
     NSString *clientVersionionStr = [infoDict objectForKey:@"CFBundleShortVersionString"];
-    NSData *clientVersionData =  [clientVersionionStr dataUsingEncoding:NSUTF8StringEncoding];
-    short clientVersionDataLength =(short)clientVersionData.length;
-    HTONS(clientVersionDataLength);
-    NSData *clientVersionLengthData = [NSData dataWithBytes:&clientVersionDataLength length:sizeof(clientVersionDataLength)];
-    [bodyData appendData:clientVersionLengthData];
-    [bodyData appendData:clientVersionData];
-   
-    // aec加密 模和指数
-    int8_t iv[16] = {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1};
-    NSData *ivData = [[NSData alloc] initWithBytes:iv length:16];
-    [[NSUserDefaults standardUserDefaults] setObject:ivData forKey:BCJIvData];
-    short ivDataLength = (short)16;
-    HTONS(ivDataLength);
-    NSData *ivLengthData = [NSData dataWithBytes:&ivDataLength length:sizeof(ivDataLength)];
-    [bodyData appendData:ivLengthData];
-    [bodyData appendBytes:iv length:16];
+    [writerPacket writeString:clientVersionionStr];
     
-    int8_t clientKey[16] = {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1};
-    NSData *clientKeyData = [[NSData alloc] initWithBytes:iv length:16];
+    // aec加密 模和指数
+    char iv[16] = {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1};
+    NSData *ivData = [[NSData alloc] initWithBytes:iv length:16];
+    [BCJUserDefaults setObject:ivData forKey:BCJIvData];
+    uint16_t ivLength = 16;
+    HTONS(ivLength);
+    [writerPacket writeInt16:ivLength];
+    [writerPacket writeBytes:ivData];
+    
+    char clientKey[16] = {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1};
+    NSData *clientKeyData = [[NSData alloc] initWithBytes:clientKey length:16];
     [BCJUserDefaults setObject:clientKeyData forKey:BCJClientKeyData];
     [BCJUserDefaults synchronize];
-    short clientKeyDataLength = (short)16;
-    HTONS(clientKeyDataLength);
-    NSData *clientKeyLengthData = [NSData dataWithBytes:&clientKeyDataLength length:sizeof(clientKeyDataLength)];
-    [bodyData appendData:clientKeyLengthData];
-    [bodyData appendBytes:clientKey length:16];
+    [writerPacket writeInt16:ivLength];
+    [writerPacket writeBytes:clientKeyData];
     
     //心跳
     int minHeartbeat = 180000;
-    ipBody.minHeartbeat = HTONL(minHeartbeat);
-    NSData *minHeartbeatData = [NSData dataWithBytes: &(ipBody.minHeartbeat) length: sizeof(ipBody.minHeartbeat)];
-    [bodyData appendData:minHeartbeatData];
+    HTONL(minHeartbeat);
+    [writerPacket writeInt32:minHeartbeat];
     int maxHeartbeat = 180000;
-    ipBody.maxHeartbeat = HTONL(maxHeartbeat);
-    NSData *maxHeartbeatData = [NSData dataWithBytes: &(ipBody.maxHeartbeat) length: sizeof(ipBody.maxHeartbeat)];
-    [bodyData appendData:maxHeartbeatData];
+    HTONL(maxHeartbeat);
+    [writerPacket writeInt32:maxHeartbeat];
     
     //时间戳
     NSDate *date = [NSDate date];
     NSTimeInterval dateS = date.timeIntervalSince1970;
-    long time = (long)dateS;
-    NSLog(@"time---%.0f",dateS);
+    long long time = (long long)dateS;
     HTONLL(time);
-    ipBody.timestamp = time;
-    NSLog(@"time---%ld",time);
-    NSData *timestampData = [NSData dataWithBytes: &(ipBody.timestamp) length: sizeof(ipBody.timestamp)];
-    [bodyData appendData:timestampData];
+    [writerPacket writeInt64:time];
     
     // rsa加密
-    NSData *enData = [RSA encryptData:bodyData publicKey:pubkey];
+    NSData *enData = [RSA encryptData:writerPacket.data publicKey:pubkey];
     
     //拼接packet
     NSMutableData *ipHeaderData = [MessageDataPacketTool ipHeaderWithLength:(uint32_t)enData.length cmd:2 cc:0 flags:1 sessionId:1 lrc:0];
-     [ipHeaderData appendData:enData];
+    [ipHeaderData appendData:enData];
     return ipHeaderData;
 }
 
@@ -202,7 +169,7 @@
     
     //body
     NSData *bodyData = [data subdataWithRange:NSMakeRange(13, length)];
-     int8_t *bodyBytes = (int8_t *)[bodyData bytes];
+    int8_t *bodyBytes = (int8_t *)[bodyData bytes];
     ipPacket.body = bodyBytes;
     return ipPacket;
 }
@@ -279,7 +246,7 @@
     short sessionIdLength;
     [sessionIdLengthData getBytes:&sessionIdLength length:sizeof(sessionIdLength)];
     NTOHS(sessionIdLength);
-   
+    
     //sessionId的data
     NSData *sessionIdStrData = [bodyData subdataWithRange:NSMakeRange(8+serverKeyLength, sessionIdLength)];
     NSString *sessionIdStr = [[NSString alloc] initWithData:sessionIdStrData encoding:NSUTF8StringEncoding];
@@ -340,7 +307,7 @@
  *  @return 混淆后的sessionKey
  */
 + (NSData *)mixKeyWithClientKey:(int8_t [])clientKey andServerKey:(int8_t[])serverKey{
-
+    
     int8_t sessionKey[16] ;
     for (int i = 0; i < 16; i++) {
         int8_t a = clientKey[i];
@@ -351,14 +318,16 @@
     }
     
     NSMutableData *bodyData = [NSMutableData data];
-    short osNameDataLength = 2;
-    short osNameLength = HTONS(osNameDataLength);
-    NSData *osNameLengthData = [NSData dataWithBytes:&osNameLength length:sizeof(osNameLength)];
-    [bodyData appendData:osNameLengthData];
+    
+    short osNameDataLength = 16;
+    HTONS(osNameDataLength);
     NSData *data = [NSData dataWithBytes:sessionKey length:16];
     [bodyData appendData:data];
     
-    return bodyData;
+    RFIWriter *writerPacket = [RFIWriter writerWithData:bodyData];
+    [writerPacket writeInt16:osNameDataLength];
+    [writerPacket writeBytes:data];
+    return writerPacket.data;
 }
 
 /**
@@ -369,33 +338,19 @@
 + (NSData *)bindDataWithUserId:(NSString *)userId{
     //body数据包
     NSMutableData *bodyData = [NSMutableData data];
-    NSData *userIdData = [userId dataUsingEncoding:NSUTF8StringEncoding];
-    short userIdDataLength = (short)userIdData.length;
-    HTONS(userIdDataLength);
-    NSData *userIdDataLengthData = [NSData dataWithBytes:&userIdDataLength length:sizeof(userIdDataLength)];
-    [bodyData appendData:userIdDataLengthData];
-    [bodyData appendData:userIdData];
+    RFIWriter *writerPacket = [RFIWriter writerWithData:bodyData];
+    [writerPacket writeString:userId];
     
     NSString *aliasStr = @"0";
-    NSData *aliasData = [aliasStr dataUsingEncoding:NSUTF8StringEncoding];
-    short aliasDataLength = (short)aliasData.length;
-    HTONS(aliasDataLength);
-    NSData *aliasDataLengthData = [NSData dataWithBytes:&aliasDataLength length:sizeof(aliasDataLength)];
-    [bodyData appendData:aliasDataLengthData];
-    [bodyData appendData:aliasData];
+    [writerPacket writeString:aliasStr];
     
     NSString *tagsStr = @"0";
-    NSData *tagsData = [tagsStr dataUsingEncoding:NSUTF8StringEncoding];
-    short tagsDataLength = (short)tagsData.length;
-    HTONS(tagsDataLength);
-    NSData *tagsDataLengthData = [NSData dataWithBytes:&tagsDataLength length:sizeof(tagsDataLength)];
-    [bodyData appendData:tagsDataLengthData];
-    [bodyData appendData:tagsData];
+    [writerPacket writeString:tagsStr];
     
     //数据包
     NSMutableData *packetData = [NSMutableData data];
-    [packetData appendData:[MessageDataPacketTool ipHeaderWithLength:(uint32_t)bodyData.length cmd:5 cc:0 flags:0 sessionId:1 lrc:0]];
-    [packetData appendData:bodyData];
+    [packetData appendData:[MessageDataPacketTool ipHeaderWithLength:(uint32_t)writerPacket.data.length cmd:5 cc:0 flags:0 sessionId:1 lrc:0]];
+    [packetData appendData:writerPacket.data];
     
     return packetData;
 }
@@ -414,32 +369,24 @@
     int8_t *sessionKey = (int8_t *)sessionKeyData.bytes;
     
     NSMutableData *bodyData = [NSMutableData data];
+    RFIWriter *writerPacket = [RFIWriter writerWithData:bodyData];
+    
     //methords
     int8_t method = 1;
-    [bodyData appendBytes:&method length:1];
+    [writerPacket writeByte:method];
     
     //url
-    NSData *urlData = [urlStr dataUsingEncoding:NSUTF8StringEncoding];
-    short urlDataLength = (short)urlData.length;
-    HTONS(urlDataLength);
-    NSData *urlDataLengthData = [NSData dataWithBytes:&urlDataLength length:sizeof(urlDataLength)];
-    [bodyData appendData:urlDataLengthData];
-    [bodyData appendData:urlData];
+    [writerPacket writeString:urlStr];
     
     //headers
     NSString *headersStr =[NSString stringWithFormat:@"Content-Type:application/x-www-form-urlencoded\ncharset:UTF-8\ndeviceTypeId:1\nreadTimeout:10000\naccessToken:%@\nversion:3.0.4\n",@"2E1408859E771AC932CB78FF0C41E2FE"];
-    NSData *headersStrData = [headersStr dataUsingEncoding:NSUTF8StringEncoding];
-    short headersStrDataLength = (short)headersStrData.length;
-    HTONS(headersStrDataLength);
-    NSData *headersStrDataLengthData = [NSData dataWithBytes:&headersStrDataLength length:sizeof(headersStrDataLength)];
-    [bodyData appendData:headersStrDataLengthData];
-    [bodyData appendData:headersStrData];
+    [writerPacket writeString:headersStr];
     
     //body
-    [bodyData appendData:messageBody];
+    [writerPacket writeBytes:messageBody];
     
     //加密
-    NSData *enBodyData = [MessageDataPacketTool aesEncriptData:bodyData WithIv:iv andKey:sessionKey];
+    NSData *enBodyData = [MessageDataPacketTool aesEncriptData:writerPacket.data WithIv:iv andKey:sessionKey];
     
     NSMutableData *packetData = [NSMutableData data];
     [packetData appendData:[MessageDataPacketTool ipHeaderWithLength:(uint32_t)enBodyData.length cmd:12 cc:0 flags:1 sessionId:1 lrc:0]];
@@ -606,7 +553,7 @@
     [bodyData appendData:sessionIdDataLengthData];
     [bodyData appendData:sessionIdData];
     
-//    NSString *aliasStr = @"0";
+    //    NSString *aliasStr = @"0";
     NSData *deviceIdData = [deviceId dataUsingEncoding:NSUTF8StringEncoding];
     short deviceIdDataLength = (short)deviceIdData.length;
     HTONS(deviceIdDataLength);
@@ -618,7 +565,7 @@
 }
 
 /**
- *  处理收到的push消息
+ *  处理收到的消息
  *
  *  @param packet    协议包
  *  @param body_data 协议包的body data
@@ -724,7 +671,7 @@
     NSData *reasonLengthData = [body subdataWithRange:NSMakeRange(2,2)];
     short reasonLength;
     [reasonLengthData getBytes:&reasonLength length:sizeof(reasonLength)];
-    NTOHS(reasonLength);
+    //    NTOHS(reasonLength);
     //reason的data
     NSData *reasonStrData = [body subdataWithRange:NSMakeRange(4, reasonLength)];
     NSString *reasonStr = [[NSString alloc] initWithData:reasonStrData encoding:NSUTF8StringEncoding];

@@ -21,9 +21,7 @@
 		0D591C921D7426410064A90C /* AFURLRequestSerialization.m in Sources */ = {isa = PBXBuildFile; fileRef = 0D591C751D7426410064A90C /* AFURLRequestSerialization.m */; };
 		0D591C931D7426410064A90C /* AFURLResponseSerialization.m in Sources */ = {isa = PBXBuildFile; fileRef = 0D591C771D7426410064A90C /* AFURLResponseSerialization.m */; };
 		0D591C941D7426410064A90C /* AFURLSessionManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 0D591C791D7426410064A90C /* AFURLSessionManager.m */; };
-		0D591C951D7426410064A90C /* Base64.m in Sources */ = {isa = PBXBuildFile; fileRef = 0D591C7C1D7426410064A90C /* Base64.m */; };
 		0D591C961D7426410064A90C /* GCDAsyncSocket.m in Sources */ = {isa = PBXBuildFile; fileRef = 0D591C7F1D7426410064A90C /* GCDAsyncSocket.m */; };
-		0D591C971D7426410064A90C /* GTMBase64.m in Sources */ = {isa = PBXBuildFile; fileRef = 0D591C821D7426410064A90C /* GTMBase64.m */; };
 		0D591C981D7426410064A90C /* LFCGzipUtility.m in Sources */ = {isa = PBXBuildFile; fileRef = 0D591C861D7426410064A90C /* LFCGzipUtility.m */; };
 		0D591C991D7426410064A90C /* RFIReader.m in Sources */ = {isa = PBXBuildFile; fileRef = 0D591C891D7426410064A90C /* RFIReader.m */; };
 		0D591C9A1D7426410064A90C /* RFIWriter.m in Sources */ = {isa = PBXBuildFile; fileRef = 0D591C8B1D7426410064A90C /* RFIWriter.m */; };
@@ -79,13 +77,8 @@
 		0D591C771D7426410064A90C /* AFURLResponseSerialization.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AFURLResponseSerialization.m; sourceTree = "<group>"; };
 		0D591C781D7426410064A90C /* AFURLSessionManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AFURLSessionManager.h; sourceTree = "<group>"; };
 		0D591C791D7426410064A90C /* AFURLSessionManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AFURLSessionManager.m; sourceTree = "<group>"; };
-		0D591C7B1D7426410064A90C /* Base64.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Base64.h; sourceTree = "<group>"; };
-		0D591C7C1D7426410064A90C /* Base64.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Base64.m; sourceTree = "<group>"; };
 		0D591C7E1D7426410064A90C /* GCDAsyncSocket.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GCDAsyncSocket.h; sourceTree = "<group>"; };
 		0D591C7F1D7426410064A90C /* GCDAsyncSocket.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GCDAsyncSocket.m; sourceTree = "<group>"; };
-		0D591C811D7426410064A90C /* GTMBase64.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GTMBase64.h; sourceTree = "<group>"; };
-		0D591C821D7426410064A90C /* GTMBase64.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GTMBase64.m; sourceTree = "<group>"; };
-		0D591C831D7426410064A90C /* GTMDefines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GTMDefines.h; sourceTree = "<group>"; };
 		0D591C851D7426410064A90C /* LFCGzipUtility.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LFCGzipUtility.h; sourceTree = "<group>"; };
 		0D591C861D7426410064A90C /* LFCGzipUtility.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LFCGzipUtility.m; sourceTree = "<group>"; };
 		0D591C881D7426410064A90C /* RFIReader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RFIReader.h; sourceTree = "<group>"; };
@@ -98,6 +91,7 @@
 		0D591C9D1D74264A0064A90C /* MessageDataPacketTool.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MessageDataPacketTool.m; sourceTree = "<group>"; };
 		0D591C9E1D74264A0064A90C /* Mpush.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Mpush.h; sourceTree = "<group>"; };
 		0D591CA01D74266A0064A90C /* libz.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libz.tbd; path = usr/lib/libz.tbd; sourceTree = SDKROOT; };
+		0D7F420B1DAA47CB008D1F85 /* mpush-client-ios(OC).entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "mpush-client-ios(OC).entitlements"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -150,6 +144,7 @@
 		0D591C371D741B900064A90C /* mpush-client-ios(OC) */ = {
 			isa = PBXGroup;
 			children = (
+				0D7F420B1DAA47CB008D1F85 /* mpush-client-ios(OC).entitlements */,
 				0D591C3B1D741B900064A90C /* AppDelegate.h */,
 				0D591C3C1D741B900064A90C /* AppDelegate.m */,
 				0D591C3E1D741B900064A90C /* ViewController.h */,
@@ -197,9 +192,7 @@
 			isa = PBXGroup;
 			children = (
 				0D591C6C1D7426410064A90C /* AFNetworking */,
-				0D591C7A1D7426410064A90C /* Base64 */,
 				0D591C7D1D7426410064A90C /* CocoaAsyncSocket */,
-				0D591C801D7426410064A90C /* GTMBase64 */,
 				0D591C841D7426410064A90C /* LFCGzipUtility */,
 				0D591C871D7426410064A90C /* rfi_reader */,
 				0D591C8C1D7426410064A90C /* RSA */,
@@ -227,15 +220,6 @@
 			path = AFNetworking;
 			sourceTree = "<group>";
 		};
-		0D591C7A1D7426410064A90C /* Base64 */ = {
-			isa = PBXGroup;
-			children = (
-				0D591C7B1D7426410064A90C /* Base64.h */,
-				0D591C7C1D7426410064A90C /* Base64.m */,
-			);
-			path = Base64;
-			sourceTree = "<group>";
-		};
 		0D591C7D1D7426410064A90C /* CocoaAsyncSocket */ = {
 			isa = PBXGroup;
 			children = (
@@ -243,16 +227,6 @@
 				0D591C7F1D7426410064A90C /* GCDAsyncSocket.m */,
 			);
 			path = CocoaAsyncSocket;
-			sourceTree = "<group>";
-		};
-		0D591C801D7426410064A90C /* GTMBase64 */ = {
-			isa = PBXGroup;
-			children = (
-				0D591C811D7426410064A90C /* GTMBase64.h */,
-				0D591C821D7426410064A90C /* GTMBase64.m */,
-				0D591C831D7426410064A90C /* GTMDefines.h */,
-			);
-			path = GTMBase64;
 			sourceTree = "<group>";
 		};
 		0D591C841D7426410064A90C /* LFCGzipUtility */ = {
@@ -351,6 +325,12 @@
 				TargetAttributes = {
 					0D591C341D741B900064A90C = {
 						CreatedOnToolsVersion = 7.3.1;
+						DevelopmentTeam = 9LW6A56WFN;
+						SystemCapabilities = {
+							com.apple.Keychain = {
+								enabled = 1;
+							};
+						};
 					};
 					0D591C4D1D741B910064A90C = {
 						CreatedOnToolsVersion = 7.3.1;
@@ -422,8 +402,6 @@
 				0D591C9A1D7426410064A90C /* RFIWriter.m in Sources */,
 				0D591C9B1D7426410064A90C /* RSA.m in Sources */,
 				0D591C911D7426410064A90C /* AFSecurityPolicy.m in Sources */,
-				0D591C951D7426410064A90C /* Base64.m in Sources */,
-				0D591C971D7426410064A90C /* GTMBase64.m in Sources */,
 				0D591C921D7426410064A90C /* AFURLRequestSerialization.m in Sources */,
 				0D591C981D7426410064A90C /* LFCGzipUtility.m in Sources */,
 				0D591C9F1D74264A0064A90C /* MessageDataPacketTool.m in Sources */,
@@ -571,6 +549,8 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = "mpush-client-ios(OC)/mpush-client-ios(OC).entitlements";
+				DEVELOPMENT_TEAM = 9LW6A56WFN;
 				INFOPLIST_FILE = "mpush-client-ios(OC)/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.bicaijia.mpush-client-ios-OC-";
@@ -582,6 +562,8 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = "mpush-client-ios(OC)/mpush-client-ios(OC).entitlements";
+				DEVELOPMENT_TEAM = 9LW6A56WFN;
 				INFOPLIST_FILE = "mpush-client-ios(OC)/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.bicaijia.mpush-client-ios-OC-";
@@ -654,6 +636,7 @@
 				0D591C641D741B910064A90C /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		0D591C651D741B910064A90C /* Build configuration list for PBXNativeTarget "mpush-client-ios(OC)Tests" */ = {
 			isa = XCConfigurationList;
@@ -662,6 +645,7 @@
 				0D591C671D741B910064A90C /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		0D591C681D741B910064A90C /* Build configuration list for PBXNativeTarget "mpush-client-ios(OC)UITests" */ = {
 			isa = XCConfigurationList;
@@ -670,6 +654,7 @@
 				0D591C6A1D741B910064A90C /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

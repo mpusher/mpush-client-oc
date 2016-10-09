@@ -12,27 +12,28 @@
 #import "RFIWriter.h"
 #import "Mpush.h"
 #import "LFCGzipUtility.h"
+
 typedef struct _ipbody
 {
-    char *deviceId;
-    char *osName;
-    char *osVersion;
-    char *clientVersion;
-    int8_t iv[16] ;
-    int8_t clientKey[16];
-    int minHeartbeat;
-    int maxHeartbeat;
-    long timestamp;
+    char *deviceId;         //设备id
+    char *osName;           // 设备名称
+    char *osVersion;        //设备版本
+    char *clientVersion;    //客户端版本
+    int8_t iv[16] ;         //aes加密指数 （16位随机数）
+    int8_t clientKey[16];   //aes加密key （16位随机数）
+    int minHeartbeat;       //最小心跳数（单位毫秒）
+    int maxHeartbeat;       //最大心跳数（单位毫秒）
+    long timestamp;         //时间戳
 }IP_BODY;
 
 typedef struct _iphdr
 {
-    uint32_t length;          //body的长度
-    int8_t cmd;           //协议消息类型
-    short cc;           //根据body生成的校验码
-    int8_t flags;         //当前包使用的一些特性
-    int sessionId;     //消息会话标示用于消息响应
-    int8_t lrc;          //用于校验header
+    uint32_t length;        //body的长度
+    int8_t cmd;             //协议消息类型
+    short cc;               //根据body生成的校验码
+    int8_t flags;           //当前包使用的一些特性
+    int sessionId;          //消息会话标示用于消息响应
+    int8_t lrc;             //用于校验header
     int8_t *body;
     
 }IP_PACKET;
@@ -42,10 +43,10 @@ typedef struct _iphdr
  */
 typedef struct _handSuccessBody
 {
-    int8_t serverKey[16];    //服务段返回的key 用于aes加密的
-    int heartbeat;     //消息会话标示用于消息响应
-    char *sessionId;    //会话id
-    long expireTime;   //失效时间
+    int8_t serverKey[16];   //服务段返回的key 用于aes加密的
+    int heartbeat;          //消息会话标示用于消息响应
+    char *sessionId;        //会话id
+    long expireTime;        //失效时间
     
 }HAND_SUCCESS_BODY;
 
@@ -55,12 +56,12 @@ typedef struct _handSuccessBody
  */
 typedef struct _handSuccess
 {
-    uint32_t length;          //body的长度
-    int8_t cmd;           //协议消息类型
-    short cc;           //根据body生成的校验码
-    int8_t flags;         //当前包使用的一些特性
-    int sessionId;     //消息会话标示用于消息响应
-    int8_t lrc;          //用于校验header
+    uint32_t length;        //body的长度
+    int8_t cmd;             //协议消息类型
+    short cc;               //根据body生成的校验码
+    int8_t flags;           //当前包使用的一些特性
+    int sessionId;          //消息会话标示用于消息响应
+    int8_t lrc;             //用于校验header
     int8_t *body;
     
 }HAND_SUCCESS;
@@ -70,9 +71,9 @@ typedef struct _handSuccess
  */
 typedef struct error
 {
-    int8_t cmd;           //协议消息类型
-    int8_t code;         //错误码
-    char *reason;     //错误原因
+    int8_t cmd;             //协议消息类型
+    int8_t code;            //错误码
+    char *reason;           //错误原因
     
 }ERROR_MESSAGE;
 
@@ -81,14 +82,14 @@ typedef struct error
  */
 typedef struct OKMessage
 {
-    int8_t cmd;           //协议消息类型
-    int8_t code;         //错误码
-    char *reason;     //错误原因
+    int8_t cmd;             //协议消息类型
+    int8_t code;            //错误码
+    char *reason;           //错误原因
     
 }OK_MESSAGE;
 
 /**
- *  握手成功的body
+ *  http响应的body
  */
 typedef struct _httpResponesBody
 {
@@ -128,7 +129,7 @@ static NSString *const pubkey = @"-------BEGIN PUBLIC KEY-----\nMIGfMA0GCSqGSIb3
  *
  *  @return 握手数据data
  */
-+ (NSData *)withPacketAndIpBody;
++ (NSData *)handshakeMessagePacketData;
 
 /**
  *  响应包信息

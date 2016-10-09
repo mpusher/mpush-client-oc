@@ -37,7 +37,9 @@
 
 - (void)writePrefixedBytes:(NSData *)data
 {
-    [self writeUInt32:(uint32_t)data.length];
+    uint16_t dataLength = (uint16_t)data.length;
+    HTONS(dataLength);
+    [self writeUInt16:dataLength];
     [self writeBytes:data];
 }
 
