@@ -52,7 +52,6 @@
 - (IBAction)connectBtnClick:(id)sender {
     NSLog(@"connectBtnClick");
     // 1.建立连接
-    
     [self networkReachability];
     
 }
