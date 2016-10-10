@@ -58,11 +58,9 @@
 }
 - (void)connectToHost{
     
-    //    NSString *host = @"106.75.7.156";
-    //    int port = 3000;
-    
-    NSString *host = @"180.150.191.8";
+    NSString *host = @"106.75.7.156";
     int port = 3000;
+    
     
     // 创建一个Socket对象
     _socket = [[GCDAsyncSocket alloc] initWithDelegate:self delegateQueue:dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0)];

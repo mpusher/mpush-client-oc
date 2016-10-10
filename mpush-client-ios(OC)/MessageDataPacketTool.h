@@ -118,9 +118,8 @@ typedef NS_ENUM(NSInteger, MpushMessageBodyCMD) {
 
 
 
-//static NSString *const pubkey = @"-------BEGIN PUBLIC KEY-----\nMIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCghPCWCobG8nTD24juwSVataW7\niViRxcTkey/B792VZEhuHjQvA3cAJgx2Lv8GnX8NIoShZtoCg3Cx6ecs+VEPD2f\nBcg2L4JK7xldGpOJ3ONEAyVsLOttXZtNXvyDZRijiErQALMTorcgi79M5uVX9/j\nMv2Ggb2XAeZhlLD28fHwIDAQAB\n-----END PUBLIC KEY-----";
+static NSString *const pubkey = @"-------BEGIN PUBLIC KEY-----\nMIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCghPCWCobG8nTD24juwSVataW7\niViRxcTkey/B792VZEhuHjQvA3cAJgx2Lv8GnX8NIoShZtoCg3Cx6ecs+VEPD2f\nBcg2L4JK7xldGpOJ3ONEAyVsLOttXZtNXvyDZRijiErQALMTorcgi79M5uVX9/j\nMv2Ggb2XAeZhlLD28fHwIDAQAB\n-----END PUBLIC KEY-----";
 
-static NSString *const pubkey = @"-------BEGIN PUBLIC KEY-----\nMIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCdIyULaS9da19R+tKuCS/LRU9a\nXfAzV8ek4FvhxgG5Az9B2eAoKHsjddwzACt9b1CtkLTnzub/SEToZEhnrq2HKhX\n2zKtHVmhwAIpYobIlYm5Lq0fWOWGR1+FqFMXoHa99DV8wm/+FS+34DS3uvoMgN5\nKYOntT9KTt+WFNH2tLhwIDAQAB\n-----END PUBLIC KEY-----";
 
 @interface MessageDataPacketTool : NSObject
 
@@ -132,7 +131,7 @@ static NSString *const pubkey = @"-------BEGIN PUBLIC KEY-----\nMIGfMA0GCSqGSIb3
 + (NSData *)handshakeMessagePacketData;
 
 /**
- *  响应包信息
+ *  握手成功响应包
  *
  *  @param data read的data
  *
@@ -144,9 +143,9 @@ static NSString *const pubkey = @"-------BEGIN PUBLIC KEY-----\nMIGfMA0GCSqGSIb3
 /**
  *  握手成功解析body
  *
- *  @param bodyData <#bodyData description#>
+ *  @param bodyData 握手成功响应包
  *
- *  @return <#return value description#>
+ *  @return 握手成功数据包的body
  */
 + (HAND_SUCCESS_BODY) HandSuccessBodyDataWithData:(NSData *)body_data andPacket:(IP_PACKET)packet;
 /**
