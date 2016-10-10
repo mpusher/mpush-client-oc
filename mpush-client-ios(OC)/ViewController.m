@@ -15,7 +15,7 @@
 #import <CommonCrypto/CommonCryptor.h>
 #import "LFCGzipUtility.h"
 
-
+#define AllocHost @"http://103.246.161.44:9999"
 
 
 
@@ -56,18 +56,43 @@
     
 }
 - (void)connectToHost{
+    // 获取分配的 主机ip 和 端口号
+    NSString *urlStr = [NSString stringWithFormat:AllocHost];
+    AFHTTPSessionManager *mng = [AFHTTPSessionManager manager];
+    mng.responseSerializer.acceptableContentTypes = [NSSet setWithObjects:@"application/json",@"text/plain",@"text/html",nil];
+    [mng.requestSerializer setValue:@"text/html; charset=utf-8" forHTTPHeaderField:@"Content-Type"];
+    mng.requestSerializer= [AFHTTPRequestSerializer serializer];
+    mng.responseSerializer= [AFHTTPResponseSerializer serializer];
+    NSDictionary *infoDict = [[NSBundle mainBundle] infoDictionary];
+    NSString *currentVersion = [infoDict objectForKey:@"CFBundleShortVersionString"];
+    [mng.requestSerializer setValue:currentVersion forHTTPHeaderField:@"version"];
+    [mng GET:urlStr parameters:nil progress:nil success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject) {
+        NSLog(@"responseObject-----%@",responseObject);
+        NSString *responseObjectStr = [[NSString alloc] initWithData:responseObject encoding:NSUTF8StringEncoding];
+        if (responseObjectStr.length < 3) {
+            return ;
+        }
+        NSArray *hostArr = [responseObjectStr componentsSeparatedByString:@":"];
+        NSString *host = hostArr[0];
+        
+        int port = [hostArr[1] intValue];
+        
+        NSLog(@"%@---%d",host,port);
+        
+        // 创建一个Socket对象
+        _socket = [[GCDAsyncSocket alloc] initWithDelegate:self delegateQueue:dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0)];
+        
+        // 连接
+        NSError *error = nil;
+        [_socket connectToHost:host onPort:port error:&error];
     
-    NSString *host = @"106.75.7.156";
-    int port = 3000;
-    
-    
-    // 创建一个Socket对象
-    _socket = [[GCDAsyncSocket alloc] initWithDelegate:self delegateQueue:dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0)];
-    
-    // 连接
-    NSError *error = nil;
-    [_socket connectToHost:host onPort:port error:&error];
+        
+    } failure:^(NSURLSessionDataTask * _Nullable task, NSError * _Nonnull error) {
+        NSLog(@"error-----%@",error);
+    }];
+
 }
+
 
 /**
  *  网络环境变化判断
