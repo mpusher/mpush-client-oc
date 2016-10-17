@@ -334,6 +334,7 @@
             break;
     }
     
+    [sock readDataWithTimeout:-1 tag:tag];//持续接收服务端放回的数据
 }
 /**
  *  心跳
