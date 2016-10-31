@@ -37,6 +37,15 @@
 /**  接收到消息的body Data */
 @property(nonatomic,strong)NSMutableData *messageBodyData;
 
+@property (weak, nonatomic) IBOutlet UITextField *allocerTextField;
+@property (weak, nonatomic) IBOutlet UITextField *userFromTextField;
+@property (weak, nonatomic) IBOutlet UITextField *userToTextField;
+@property (weak, nonatomic) IBOutlet UITextField *pushContentTextField;
+@property (weak, nonatomic) IBOutlet UIButton *bindButton;
+@property (weak, nonatomic) IBOutlet UIButton *unBindButton;
+@property (weak, nonatomic) IBOutlet UIButton *sendButton;
+
+
 @end
 
 @implementation ViewController
@@ -57,7 +66,7 @@
 }
 - (void)connectToHost{
     // 获取分配的 主机ip 和 端口号
-    NSString *urlStr = [NSString stringWithFormat:AllocHost];
+    NSString *urlStr = self.allocerTextField.text;
     AFHTTPSessionManager *mng = [AFHTTPSessionManager manager];
     mng.responseSerializer.acceptableContentTypes = [NSSet setWithObjects:@"application/json",@"text/plain",@"text/html",nil];
     [mng.requestSerializer setValue:@"text/html; charset=utf-8" forHTTPHeaderField:@"Content-Type"];
@@ -85,7 +94,9 @@
         // 连接
         NSError *error = nil;
         [_socket connectToHost:host onPort:port error:&error];
-    
+        
+        [self.messages addObject:@"socketConnectToHost"];
+        [self messageTableViewReloadData];
         
     } failure:^(NSURLSessionDataTask * _Nullable task, NSError * _Nonnull error) {
         NSLog(@"error-----%@",error);
@@ -140,13 +151,19 @@
     [manager startMonitoring];
 }
 
-
+/** 绑定用户 */
 - (IBAction)bindBtnClick:(id)sender {
     NSLog(@"bindBtnClick");
     
+    [self.messages addObject:@"绑定用户..."];
+    [self messageTableViewReloadData];
     //绑定用户
-    [self.socket writeData:[MessageDataPacketTool bindDataWithUserId:[NSString stringWithFormat:@"%@",@111]] withTimeout:-1 tag:222];
+    [self.socket writeData:[MessageDataPacketTool bindDataWithUserId:[NSString stringWithFormat:@"%@",self.userFromTextField.text]] withTimeout:-1 tag:222];
 }
+- (IBAction)unbindBtnClick:(id)sender {
+    
+}
+
 - (void)touchesBegan:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event{
     [self.messageTextField endEditing:YES];
 }
@@ -163,15 +180,19 @@
 #pragma mark -UITextFieldDelegate
 // 发送消息
 - (BOOL)textFieldShouldReturn:(UITextField *)textField{
-    
-    NSLog(@"textFieldShouldReturn--%@",textField.text);
+    [self sendPushMessage];
+    return YES;
+}
+// 发送消息
+- (void) sendPushMessage{
     
     // 通过http代理发送数据
-    [self.messages addObject:textField.text];
-    
     NSMutableData *dataaa = [NSMutableData data];
-    NSString *str = textField.text;
-    NSData *strData = [str dataUsingEncoding:NSUTF8StringEncoding];
+    NSMutableDictionary *contentDict = [NSMutableDictionary dictionary];
+    contentDict[@"userId"] = self.userToTextField.text;
+    contentDict[@"hello"] = self.messageTextField.text;
+    NSData *contentJsonData = [NSJSONSerialization dataWithJSONObject:contentDict options:NSJSONWritingPrettyPrinted error:nil];
+    NSData *strData = contentJsonData;
     
     short strDataLength = (short)strData.length;
     HTONS(strDataLength);
@@ -179,16 +200,14 @@
     [dataaa appendData:strDataLengthData];
     [dataaa appendData:strData];
     
-    NSString *urlStr = [NSString stringWithFormat:@"%@cafe/sendMessage.do?",CAFE_HOST_ADDRESS];
+    NSString *urlStr = [NSString stringWithFormat:@"%@",PUSH_HOST_ADDRESS];
     
     [self.socket writeData:[MessageDataPacketTool chatDataWithBody:dataaa andUrlStr:urlStr] withTimeout:-1 tag:222];
     
+    [self.messages addObject:[NSString stringWithFormat:@"发送数据%@",self.messageTextField.text]];
+    self.messageTextField.text = nil;
+    [self messageTableViewReloadData];
     
-    textField.text = nil;
-    
-    [self.messageTableView reloadData];
-    
-    return YES;
 }
 
 #pragma mark - UITableViewDelegate and UITableViewDataSource
@@ -211,20 +230,32 @@
 }
 
 #pragma mark -GCDAsyncSocketDelegate
-
 // 连接主机成功
 -(void)socket:(GCDAsyncSocket *)sock didConnectToHost:(NSString *)host port:(uint16_t)port{
     NSLog(@"连接主机成功");
+    
+    [self.messages addObject:@"socketDidConnectToHost"];
+    [self messageTableViewReloadData];
     self.socket = sock;
     // 发送协议报文
     [sock writeData:[MessageDataPacketTool handshakeMessagePacketData] withTimeout:-1 tag:222];
     
+}
+- (void) messageTableViewReloadData{
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [self.messageTableView reloadData];
+        NSIndexPath *indexPath = [NSIndexPath indexPathForRow:self.messages.count-1 inSection:0];
+        [self.messageTableView scrollToRowAtIndexPath:indexPath atScrollPosition:UITableViewScrollPositionBottom animated:YES];
+    });
 }
 
 // 与主机断开连接
 -(void)socketDidDisconnect:(GCDAsyncSocket *)sock withError:(NSError *)err{
     if(err){
         NSLog(@"断开连接 %@",err);
+        
+        [self.messages addObject:@"socketDidDisconnect"];
+        [self messageTableViewReloadData];
     }
 }
 
@@ -238,7 +269,6 @@
 // 读取到数据时调用
 -(void)socket:(GCDAsyncSocket *)sock didReadData:(NSData *)data withTag:(long)tag{
     
-    NSLog(@"data--%@",data);
     //心跳
     if (data.length == 1) {
         return ;
@@ -281,6 +311,9 @@
             
         case MpushMessageBodyCMDHandShakeSuccess:
             NSLog(@"握手成功");
+            
+            [self.messages addObject:@"握手成功"];
+            [self messageTableViewReloadData];
             [self processHandShakeDataWithPacket:packet andData:body_data];
             break;
             
@@ -312,11 +345,15 @@
         case MpushMessageBodyCMDOk: //ok
             //                        [MessageDataPacketTool okWithBody:body_data];
             NSLog(@"======绑定成功=========");
+            [self.messages addObject:@"成功绑定用户!"];
+            [self messageTableViewReloadData];
             break;
             
         case MpushMessageBodyCMDHttp: // http代理
         {
             NSLog(@"ok======聊天=========");
+            [self.messages addObject:@"成功调用http代理"];
+            [self messageTableViewReloadData];
             NSData *bodyData = [MessageDataPacketTool processFlagWithPacket:packet andBodyData:body_data];
             HTTP_RESPONES_BODY responesBody = [MessageDataPacketTool chatDataSuccessWithData:bodyData];
             NSLog(@"--%d",responesBody.statusCode);
@@ -352,7 +389,34 @@
  */
 - (void)processRecievePushMessageWithPacket:(IP_PACKET)packet andData:(NSData *)body_data{
     id content = [MessageDataPacketTool processRecievePushMessageWithPacket:packet andData:body_data];
-    NSLog(@"content--%@",content);
+    NSString *contentJsonStr = content[@"content"];
+    NSDictionary *contentDict = [self dictionaryWithJsonString:contentJsonStr];
+    NSString *contentStr = contentDict[@"content"];
+    
+    [self.messages addObject:[NSString stringWithFormat:@"收到push消息--%@",contentStr]];
+    [self messageTableViewReloadData];
+    NSLog(@"content--%@",contentDict);
+}
+/*!
+ * @brief 把格式化的JSON格式的字符串转换成字典
+ * @param jsonString JSON格式的字符串
+ * @return 返回字典
+ */
+- (NSDictionary *)dictionaryWithJsonString:(NSString *)jsonString {
+    if (jsonString == nil) {
+        return nil;
+    }
+    
+    NSData *jsonData = [jsonString dataUsingEncoding:NSUTF8StringEncoding];
+    NSError *err;
+    NSDictionary *dic = [NSJSONSerialization JSONObjectWithData:jsonData
+                                                        options:NSJSONReadingMutableContainers
+                                                          error:&err];
+    if(err) {
+        NSLog(@"json解析失败：%@",err);
+        return nil;
+    }
+    return dic;
 }
 
 /**
@@ -375,10 +439,12 @@
     
     //添加计时器
     _timer = [NSTimer timerWithTimeInterval:handSuccessBody.heartbeat/1000.0 target:self selector:@selector(heartbeatSend) userInfo:nil repeats:YES];
-    [[NSRunLoop mainRunLoop] addTimer:_timer forMode:NSDefaultRunLoopMode];
+    [[NSRunLoop currentRunLoop] addTimer:_timer forMode:NSDefaultRunLoopMode];
     
-    //绑定用户
-    //    [self.socket writeData:[MessageDataPacketTool bindDataWithUserId:[NSString stringWithFormat:@"%@",@111]] withTimeout:-1 tag:222];
+}
+// 发送消息按钮点击
+- (IBAction)senfBtnClick:(id)sender {
+    [self sendPushMessage];
 }
 
 

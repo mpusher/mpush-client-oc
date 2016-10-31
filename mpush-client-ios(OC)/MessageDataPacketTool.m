@@ -379,7 +379,7 @@
     [writerPacket writeString:urlStr];
     
     //headers
-    NSString *headersStr =[NSString stringWithFormat:@"Content-Type:application/x-www-form-urlencoded\ncharset:UTF-8\ndeviceTypeId:1\nreadTimeout:10000\naccessToken:%@\nversion:3.0.4\n",@"2E1408859E771AC932CB78FF0C41E2FE"];
+    NSString *headersStr =[NSString stringWithFormat:@"Content-Type:application/x-www-form-urlencoded\ncharset:UTF-8\ndeviceTypeId:1\nreadTimeout:10000"];
     [writerPacket writeString:headersStr];
     
     //body
@@ -590,23 +590,33 @@
  *  @return 处理后的 body data
  */
 + (NSData *) processFlagWithPacket:(IP_PACKET)packet andBodyData:(NSData *)body_data{
-    NSData *bodyData;
+    NSData *bodyData = [NSData data];
     NSData *ivData = [BCJUserDefaults objectForKey:BCJIvData];
     int8_t *iv = (int8_t *)[ivData bytes];
     NSData *sessionKeyData = [BCJUserDefaults objectForKey:BCJSessionKeyData];
     int8_t *sessionKey = (int8_t *)sessionKeyData.bytes;
     
-    if (packet.flags == 1) { //仅加密
+//    if (packet.flags == 1) { //仅加密
+//        bodyData = [MessageDataPacketTool aesDecriptWithEncryptData:body_data withIv:iv andKey:sessionKey];
+//        
+//    } else if(packet.flags == 0){ //没加密
+//        bodyData = body_data;
+//        
+//    } else { //加密又压缩
+//        NSLog(@"加密又压缩");
+//        bodyData = [MessageDataPacketTool aesDecriptWithEncryptData:body_data withIv:iv andKey:sessionKey];
+//        bodyData = [LFCGzipUtility ungzipData:bodyData];
+//    }
+    
+    bodyData = body_data;
+    if ((packet.flags&1) != 0) { //解密
         bodyData = [MessageDataPacketTool aesDecriptWithEncryptData:body_data withIv:iv andKey:sessionKey];
-        
-    } else if(packet.flags == 0){ //没加密
-        bodyData = body_data;
-        
-    } else { //加密又压缩
-        NSLog(@"加密又压缩");
-        bodyData = [MessageDataPacketTool aesDecriptWithEncryptData:body_data withIv:iv andKey:sessionKey];
+    }
+    if (((packet.flags&2) != 0)) { // 解压缩
         bodyData = [LFCGzipUtility ungzipData:bodyData];
     }
+//    [MessageDataPacketTool chatDataSuccessWithData:bodyData];
+    
     return bodyData;
 }
 

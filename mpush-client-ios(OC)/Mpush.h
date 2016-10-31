@@ -14,8 +14,7 @@
 #define BCJUserDefaults  [NSUserDefaults standardUserDefaults]
 #define  BCJIvData @"BCJIvData"
 #define  BCJClientKeyData @"BCJClientKeyData"
-#define CAFE_HOST_ADDRESS @"http://cafe3.bicaijia.com/"
-#define CAFE_HOST_ADDRESS_MPush @"http://cafe3.bicaijia.com/"
+#define PUSH_HOST_ADDRESS @"http://103.246.161.44:9999/push"
 
 #define  BCJSessionKeyData @"BCJSessionKeyData"
 #define  BCJSessionId @"BCJSessionId"
