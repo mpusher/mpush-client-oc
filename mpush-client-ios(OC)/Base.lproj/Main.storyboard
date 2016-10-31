@@ -36,24 +36,6 @@
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="GE3-dm-GUc">
-                                <color key="backgroundColor" red="0.0" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-                                <constraints>
-                                    <constraint firstAttribute="height" constant="30" id="NwM-JZ-SOV"/>
-                                </constraints>
-                                <fontDescription key="fontDescription" type="system" pointSize="14"/>
-                                <textInputTraits key="textInputTraits"/>
-                                <variation key="default">
-                                    <mask key="constraints">
-                                        <exclude reference="NwM-JZ-SOV"/>
-                                    </mask>
-                                </variation>
-                                <variation key="heightClass=regular-widthClass=compact">
-                                    <mask key="constraints">
-                                        <include reference="NwM-JZ-SOV"/>
-                                    </mask>
-                                </variation>
-                            </textField>
                             <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="44" sectionHeaderHeight="28" sectionFooterHeight="28" translatesAutoresizingMaskIntoConstraints="NO" id="wW6-jn-NYN">
                                 <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                 <constraints>
@@ -194,7 +176,6 @@
                             <constraint firstItem="kBe-ya-LdY" firstAttribute="leading" secondItem="TdE-ng-5rw" secondAttribute="leading" id="H0g-TG-NhQ"/>
                             <constraint firstItem="Sei-m2-EoW" firstAttribute="leading" secondItem="uIm-TY-9WA" secondAttribute="trailing" constant="10" id="Kok-5F-2iY"/>
                             <constraint firstItem="1PV-o9-tUr" firstAttribute="leading" secondItem="WjY-82-inP" secondAttribute="trailing" constant="57" id="MOo-QD-kI8"/>
-                            <constraint firstItem="GE3-dm-GUc" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leadingMargin" constant="20" id="QgM-6K-4dA"/>
                             <constraint firstItem="1PV-o9-tUr" firstAttribute="centerY" secondItem="F6F-sy-qvs" secondAttribute="centerY" id="RcV-a1-NQq"/>
                             <constraint firstItem="mnZ-ca-Hjm" firstAttribute="centerY" secondItem="F6F-sy-qvs" secondAttribute="centerY" id="UXh-kt-ENb"/>
                             <constraint firstItem="kBe-ya-LdY" firstAttribute="top" secondItem="TdE-ng-5rw" secondAttribute="bottom" constant="20" id="VaJ-f9-QQO"/>
@@ -202,19 +183,13 @@
                             <constraint firstItem="ZTU-9d-Owh" firstAttribute="leading" secondItem="zpR-RE-qFL" secondAttribute="trailing" constant="10" id="Xm7-NI-26b"/>
                             <constraint firstItem="Sei-m2-EoW" firstAttribute="centerY" secondItem="uIm-TY-9WA" secondAttribute="centerY" id="Z6z-0k-MeH"/>
                             <constraint firstItem="WjY-82-inP" firstAttribute="centerY" secondItem="F6F-sy-qvs" secondAttribute="centerY" id="aml-Lh-raR"/>
-                            <constraint firstAttribute="trailingMargin" secondItem="GE3-dm-GUc" secondAttribute="trailing" id="fNM-at-bGQ">
-                                <variation key="heightClass=regular-widthClass=compact" constant="20"/>
-                            </constraint>
+                            <constraint firstItem="wfy-db-euE" firstAttribute="top" secondItem="wW6-jn-NYN" secondAttribute="bottom" constant="50" id="hdu-1g-uBD"/>
                             <constraint firstItem="k6T-BW-t2T" firstAttribute="top" secondItem="F6F-sy-qvs" secondAttribute="bottom" constant="20" id="ic9-Aa-ZvW"/>
                             <constraint firstItem="zpR-RE-qFL" firstAttribute="centerY" secondItem="kBe-ya-LdY" secondAttribute="centerY" id="kMV-Xf-Dxg"/>
                             <constraint firstItem="zpR-RE-qFL" firstAttribute="leading" secondItem="kBe-ya-LdY" secondAttribute="trailing" constant="10" id="m4J-1z-hXg"/>
                             <constraint firstItem="mnZ-ca-Hjm" firstAttribute="leading" secondItem="1PV-o9-tUr" secondAttribute="trailing" constant="30" id="mI5-3G-Hu6"/>
                             <constraint firstItem="0tB-pe-mS3" firstAttribute="leading" secondItem="Sei-m2-EoW" secondAttribute="trailing" constant="10" id="nh9-tZ-X2N"/>
                             <constraint firstItem="uIm-TY-9WA" firstAttribute="leading" secondItem="k6T-BW-t2T" secondAttribute="leading" id="npd-9J-KIE"/>
-                            <constraint firstItem="GE3-dm-GUc" firstAttribute="top" secondItem="wW6-jn-NYN" secondAttribute="bottom" id="nyf-AI-oLs">
-                                <variation key="heightClass=regular-widthClass=compact" constant="20"/>
-                            </constraint>
-                            <constraint firstItem="wfy-db-euE" firstAttribute="top" secondItem="GE3-dm-GUc" secondAttribute="bottom" id="pcn-0S-5qO"/>
                             <constraint firstItem="f1H-Cz-i8m" firstAttribute="centerY" secondItem="k6T-BW-t2T" secondAttribute="centerY" id="qP8-lc-aGJ"/>
                             <constraint firstAttribute="trailingMargin" secondItem="wW6-jn-NYN" secondAttribute="trailing" id="rW9-p5-w13"/>
                             <constraint firstItem="wW6-jn-NYN" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leadingMargin" id="rd7-dk-jbX"/>
@@ -225,35 +200,24 @@
                         </constraints>
                         <variation key="default">
                             <mask key="subviews">
-                                <exclude reference="GE3-dm-GUc"/>
                                 <exclude reference="wW6-jn-NYN"/>
                             </mask>
                             <mask key="constraints">
                                 <exclude reference="rW9-p5-w13"/>
                                 <exclude reference="rd7-dk-jbX"/>
-                                <exclude reference="QgM-6K-4dA"/>
-                                <exclude reference="fNM-at-bGQ"/>
-                                <exclude reference="nyf-AI-oLs"/>
                             </mask>
                         </variation>
                         <variation key="heightClass=regular-widthClass=compact">
                             <mask key="subviews">
-                                <include reference="GE3-dm-GUc"/>
                                 <include reference="wW6-jn-NYN"/>
                             </mask>
                             <mask key="constraints">
                                 <include reference="rW9-p5-w13"/>
                                 <include reference="rd7-dk-jbX"/>
-                                <include reference="QgM-6K-4dA"/>
-                                <include reference="fNM-at-bGQ"/>
-                                <include reference="nyf-AI-oLs"/>
                             </mask>
                         </variation>
                     </view>
-                    <navigationItem key="navigationItem" title="Mpush" id="NpW-n1-0pQ">
-                        <barButtonItem key="leftBarButtonItem" title="连接" id="0Y7-mp-Y50"/>
-                        <barButtonItem key="rightBarButtonItem" title="绑定" id="Xew-0P-6Np"/>
-                    </navigationItem>
+                    <navigationItem key="navigationItem" title="Mpush" id="NpW-n1-0pQ"/>
                     <connections>
                         <outlet property="allocerTextField" destination="zpR-RE-qFL" id="YnY-wN-8K4"/>
                         <outlet property="bindButton" destination="1PV-o9-tUr" id="D9s-hN-T1q"/>
