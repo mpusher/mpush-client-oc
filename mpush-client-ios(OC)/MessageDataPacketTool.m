@@ -28,7 +28,7 @@
  */
 
 + (NSMutableData *)ipHeaderWithLength:(uint32_t)length
-                                  cmd:(int8_t)cmd
+                                  cmd:(MpushMessageBodyCMD)cmd
                                    cc:(int16_t)cc
                                 flags:(int8_t)flags
                             sessionId:(uint32_t)sessionId
@@ -61,6 +61,8 @@
     
     //设备唯一标识
     NSString *identifierForVendor = [[UIDevice currentDevice].identifierForVendor UUIDString];
+    [MPUserDefaults setObject:identifierForVendor forKey:MPDeviceId];
+    
     [writerPacket writeString:identifierForVendor];
     
     //设备名称
@@ -79,7 +81,7 @@
     // aec加密 模和指数
     char iv[16] = {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1};
     NSData *ivData = [[NSData alloc] initWithBytes:iv length:16];
-    [BCJUserDefaults setObject:ivData forKey:BCJIvData];
+    [MPUserDefaults setObject:ivData forKey:MPIvData];
     uint16_t ivLength = 16;
     HTONS(ivLength);
     [writerPacket writeInt16:ivLength];
@@ -87,16 +89,16 @@
     
     char clientKey[16] = {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1};
     NSData *clientKeyData = [[NSData alloc] initWithBytes:clientKey length:16];
-    [BCJUserDefaults setObject:clientKeyData forKey:BCJClientKeyData];
-    [BCJUserDefaults synchronize];
+    [MPUserDefaults setObject:clientKeyData forKey:MPClientKeyData];
+    [MPUserDefaults synchronize];
     [writerPacket writeInt16:ivLength];
     [writerPacket writeBytes:clientKeyData];
     
     //心跳
-    int minHeartbeat = 180000;
+    int minHeartbeat = MPMinHeartbeat;
     HTONL(minHeartbeat);
     [writerPacket writeInt32:minHeartbeat];
-    int maxHeartbeat = 180000;
+    int maxHeartbeat = MPMaxHeartbeat;
     HTONL(maxHeartbeat);
     [writerPacket writeInt32:maxHeartbeat];
     
@@ -111,7 +113,7 @@
     NSData *enData = [RSA encryptData:writerPacket.data publicKey:pubkey];
     
     //拼接packet
-    NSMutableData *ipHeaderData = [MessageDataPacketTool ipHeaderWithLength:(uint32_t)enData.length cmd:2 cc:0 flags:1 sessionId:1 lrc:0];
+    NSMutableData *ipHeaderData = [MessageDataPacketTool ipHeaderWithLength:(uint32_t)enData.length cmd:MpushMessageBodyCMDHandShakeSuccess cc:0 flags:1 sessionId:1 lrc:0];
     [ipHeaderData appendData:enData];
     return ipHeaderData;
 }
@@ -186,14 +188,14 @@
     NSData *bodyData;
     if (packet.flags == 1) { //仅加密
         int8_t iv[16];
-        NSData *ivData = [BCJUserDefaults objectForKey:BCJIvData];
+        NSData *ivData = [MPUserDefaults objectForKey:MPIvData];
         int8_t *ivBytes = (int8_t *)[ivData bytes];
         for (int i = 0; i < ivData.length; i ++) {
             iv[i] = ivBytes[i];
         }
         
         int8_t clientKey[16] ;
-        NSData *clientKeyData = [BCJUserDefaults objectForKey:BCJClientKeyData];
+        NSData *clientKeyData = [MPUserDefaults objectForKey:MPClientKeyData];
         int8_t *clientKeyBytes = (int8_t *)[clientKeyData bytes];
         for (int i = 0; i < clientKeyData.length; i ++) {
             clientKey[i] = clientKeyBytes[i];
@@ -206,14 +208,14 @@
     } else { //加密又压缩
         NSLog(@"加密又压缩");
         int8_t iv[16];
-        NSData *ivData = [BCJUserDefaults objectForKey:BCJIvData];
+        NSData *ivData = [MPUserDefaults objectForKey:MPIvData];
         int8_t *ivBytes = (int8_t *)[ivData bytes];
         for (int i = 0; i < ivData.length; i ++) {
             iv[i] = ivBytes[i];
         }
         
         int8_t clientKey[16] ;
-        NSData *clientKeyData = [BCJUserDefaults objectForKey:BCJClientKeyData];
+        NSData *clientKeyData = [MPUserDefaults objectForKey:MPClientKeyData];
         int8_t *clientKeyBytes = (int8_t *)[clientKeyData bytes];
         for (int i = 0; i < clientKeyData.length; i ++) {
             clientKey[i] = clientKeyBytes[i];
@@ -260,7 +262,7 @@
     handSuccessBody.expireTime = expireTime;
     
     int8_t clientKey[16] ;
-    NSData *clientKeyData = [BCJUserDefaults objectForKey:BCJClientKeyData];
+    NSData *clientKeyData = [MPUserDefaults objectForKey:MPClientKeyData];
     int8_t *clientKeyBytes = (int8_t *)[clientKeyData bytes];
     for (int i = 0; i < clientKeyData.length; i ++) {
         clientKey[i] = clientKeyBytes[i];
@@ -275,14 +277,14 @@
     }
     
     NSData *sessionKeyData = [NSData dataWithBytes:sessionKey length:16];
-    [BCJUserDefaults setObject:sessionKeyData forKey:BCJSessionKeyData];
+    [MPUserDefaults setObject:sessionKeyData forKey:MPSessionKeyData];
     
     NSLog(@"sessionId---%s",handSuccessBody.sessionId);
-    [BCJUserDefaults setObject:[NSString stringWithUTF8String:handSuccessBody.sessionId] forKey:BCJSessionId];
+    [MPUserDefaults setObject:[NSString stringWithUTF8String:handSuccessBody.sessionId] forKey:MPSessionId];
     
     NSLog(@"expireTime---%ld",handSuccessBody.expireTime);
-    [BCJUserDefaults setObject:[NSString stringWithFormat:@"%.0f",handSuccessBody.expireTime/1000.0] forKey:BCJExpireTime];
-    [BCJUserDefaults synchronize];
+    [MPUserDefaults setObject:[NSString stringWithFormat:@"%.0f",handSuccessBody.expireTime/1000.0] forKey:MPExpireTime];
+    [MPUserDefaults synchronize];
     
     return handSuccessBody;
 }
@@ -335,7 +337,7 @@
  *
  *  @param userId 用户id
  */
-+ (NSData *)bindDataWithUserId:(NSString *)userId{
++ (NSData *)bindDataWithUserId:(NSString *)userId andIsUnbindFlag:(BOOL)isUnbindFlag{
     //body数据包
     NSMutableData *bodyData = [NSMutableData data];
     RFIWriter *writerPacket = [RFIWriter writerWithData:bodyData];
@@ -349,7 +351,11 @@
     
     //数据包
     NSMutableData *packetData = [NSMutableData data];
-    [packetData appendData:[MessageDataPacketTool ipHeaderWithLength:(uint32_t)writerPacket.data.length cmd:5 cc:0 flags:0 sessionId:1 lrc:0]];
+    MpushMessageBodyCMD bindCmd = MpushMessageBodyCMDBind;
+    if (isUnbindFlag) {
+        bindCmd = MpushMessageBodyCMDUnbind;
+    }
+    [packetData appendData:[MessageDataPacketTool ipHeaderWithLength:(uint32_t)writerPacket.data.length cmd:bindCmd cc:0 flags:0 sessionId:1 lrc:0]];
     [packetData appendData:writerPacket.data];
     
     return packetData;
@@ -363,9 +369,9 @@
  *  @return 聊天data
  */
 + (NSData *)chatDataWithBody:(NSData *)messageBody andUrlStr:(NSString *)urlStr{
-    NSData *ivData = [BCJUserDefaults objectForKey:BCJIvData];
+    NSData *ivData = [MPUserDefaults objectForKey:MPIvData];
     int8_t *iv = (int8_t *)[ivData bytes];
-    NSData *sessionKeyData = [BCJUserDefaults objectForKey:BCJSessionKeyData];
+    NSData *sessionKeyData = [MPUserDefaults objectForKey:MPSessionKeyData];
     int8_t *sessionKey = (int8_t *)sessionKeyData.bytes;
     
     NSMutableData *bodyData = [NSMutableData data];
@@ -389,7 +395,7 @@
     NSData *enBodyData = [MessageDataPacketTool aesEncriptData:writerPacket.data WithIv:iv andKey:sessionKey];
     
     NSMutableData *packetData = [NSMutableData data];
-    [packetData appendData:[MessageDataPacketTool ipHeaderWithLength:(uint32_t)enBodyData.length cmd:12 cc:0 flags:1 sessionId:1 lrc:0]];
+    [packetData appendData:[MessageDataPacketTool ipHeaderWithLength:(uint32_t)enBodyData.length cmd:MpushMessageBodyCMDHttp cc:0 flags:1 sessionId:1 lrc:0]];
     [packetData appendData:enBodyData];
     
     return packetData;
@@ -542,26 +548,46 @@
  *
  *  @return 快速重连所需data
  */
-+ (NSData *)fastConnectWithSessionId:(NSString *)sessionId andDeviceId:(NSString *)deviceId andMinHeartbeat:(int)minHeartbeat andMaxHeartbeat:(int)maxHeartbeat{
++ (NSData *)fastConnect{
     
+    NSString *deviceId = [MPUserDefaults objectForKey:MPDeviceId];
+    NSString *sessionId = [MPUserDefaults objectForKey:MPSessionId];
+    int32_t minHeartbeat = MPMinHeartbeat;
+    int32_t maxHeartbeat = MPMaxHeartbeat;
+
     //body数据包
     NSMutableData *bodyData = [NSMutableData data];
-    NSData *sessionIdData = [sessionId dataUsingEncoding:NSUTF8StringEncoding];
-    short sessionIdDataLength = (short)sessionIdData.length;
-    HTONS(sessionIdDataLength);
-    NSData *sessionIdDataLengthData = [NSData dataWithBytes:&sessionIdDataLength length:sizeof(sessionIdDataLength)];
-    [bodyData appendData:sessionIdDataLengthData];
-    [bodyData appendData:sessionIdData];
+    RFIWriter *writer = [[RFIWriter alloc] initWithData:bodyData];
+    HTONL(minHeartbeat);
+    HTONL(maxHeartbeat);
+    [writer writeString:sessionId];
+    [writer writeString:deviceId];
+    [writer writeInt32:minHeartbeat];
+    [writer writeInt32:maxHeartbeat];
+    // rsa加密
+    NSData *enData = [RSA encryptData:writer.data publicKey:pubkey];
+    
+    //拼接packet
+    NSMutableData *ipHeaderData = [MessageDataPacketTool ipHeaderWithLength:(uint32_t)enData.length cmd:MpushMessageBodyCMDFastConnect cc:0 flags:1 sessionId:1 lrc:0];
+    [ipHeaderData appendData:enData];
+    
+    return ipHeaderData;
+    
+//    NSData *sessionIdData = [sessionId dataUsingEncoding:NSUTF8StringEncoding];
+//    short sessionIdDataLength = (short)sessionIdData.length;
+//    HTONS(sessionIdDataLength);
+//    NSData *sessionIdDataLengthData = [NSData dataWithBytes:&sessionIdDataLength length:sizeof(sessionIdDataLength)];
+//    [bodyData appendData:sessionIdDataLengthData];
+//    [bodyData appendData:sessionIdData];
     
     //    NSString *aliasStr = @"0";
-    NSData *deviceIdData = [deviceId dataUsingEncoding:NSUTF8StringEncoding];
-    short deviceIdDataLength = (short)deviceIdData.length;
-    HTONS(deviceIdDataLength);
-    NSData *deviceIdDataLengthData = [NSData dataWithBytes:&deviceIdDataLength length:sizeof(deviceIdDataLength)];
-    [bodyData appendData:deviceIdDataLengthData];
-    [bodyData appendData:deviceIdData];
-    
-    return  bodyData;
+//    NSData *deviceIdData = [deviceId dataUsingEncoding:NSUTF8StringEncoding];
+//    short deviceIdDataLength = (short)deviceIdData.length;
+//    HTONS(deviceIdDataLength);
+//    NSData *deviceIdDataLengthData = [NSData dataWithBytes:&deviceIdDataLength length:sizeof(deviceIdDataLength)];
+//    [bodyData appendData:deviceIdDataLengthData];
+//    [bodyData appendData:deviceIdData];
+//    return  bodyData;
 }
 
 /**
@@ -591,22 +617,10 @@
  */
 + (NSData *) processFlagWithPacket:(IP_PACKET)packet andBodyData:(NSData *)body_data{
     NSData *bodyData = [NSData data];
-    NSData *ivData = [BCJUserDefaults objectForKey:BCJIvData];
+    NSData *ivData = [MPUserDefaults objectForKey:MPIvData];
     int8_t *iv = (int8_t *)[ivData bytes];
-    NSData *sessionKeyData = [BCJUserDefaults objectForKey:BCJSessionKeyData];
+    NSData *sessionKeyData = [MPUserDefaults objectForKey:MPSessionKeyData];
     int8_t *sessionKey = (int8_t *)sessionKeyData.bytes;
-    
-//    if (packet.flags == 1) { //仅加密
-//        bodyData = [MessageDataPacketTool aesDecriptWithEncryptData:body_data withIv:iv andKey:sessionKey];
-//        
-//    } else if(packet.flags == 0){ //没加密
-//        bodyData = body_data;
-//        
-//    } else { //加密又压缩
-//        NSLog(@"加密又压缩");
-//        bodyData = [MessageDataPacketTool aesDecriptWithEncryptData:body_data withIv:iv andKey:sessionKey];
-//        bodyData = [LFCGzipUtility ungzipData:bodyData];
-//    }
     
     bodyData = body_data;
     if ((packet.flags&1) != 0) { //解密
@@ -688,6 +702,22 @@
     NSLog(@"ok--%@",reasonStr);
     okMessage.reason = (char *)reasonStr.UTF8String;
     return okMessage;
+}
+
++ (BOOL)isFastConnect{
+    
+    NSString *sessionId = [MPUserDefaults objectForKey:MPSessionId];
+    // 过期时间
+    NSString *expireTimeStr = [MPUserDefaults objectForKey:MPExpireTime];
+    // 当前时间
+    NSTimeInterval date = [[NSDate date] timeIntervalSince1970];
+    
+    // 发送握手数据
+    if (!sessionId || expireTimeStr.doubleValue < date) {
+        return NO;
+    } else{
+        return YES;
+    }
 }
 
 

@@ -11,13 +11,18 @@
 
 #define appVersion @"9.2.1";
 
-#define BCJUserDefaults  [NSUserDefaults standardUserDefaults]
-#define  BCJIvData @"BCJIvData"
-#define  BCJClientKeyData @"BCJClientKeyData"
+#define MPUserDefaults  [NSUserDefaults standardUserDefaults]
+#define  MPIvData @"BCJIvData"
+#define  MPClientKeyData @"BCJClientKeyData"
 #define PUSH_HOST_ADDRESS @"http://103.246.161.44:9999/push"
 
-#define  BCJSessionKeyData @"BCJSessionKeyData"
-#define  BCJSessionId @"BCJSessionId"
-#define  BCJExpireTime @"BCJExpireTime"
+#define  MPSessionKeyData @"BCJSessionKeyData"
+#define  MPSessionId @"BCJSessionId"
+#define  MPExpireTime @"BCJExpireTime"
+#define MPDeviceId @"identifierForVendor"
+#define MPMinHeartbeat 180
+#define MPMaxHeartbeat 180
+#define MPMaxConnectTimes 6
+
 
 #endif /* Mpush_h */

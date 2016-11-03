@@ -36,6 +36,14 @@
 @property(nonatomic,assign)int recieveNum;
 /**  接收到消息的body Data */
 @property(nonatomic,strong)NSMutableData *messageBodyData;
+/** 绑定的用户id  */
+@property(nonatomic,copy)NSString *userId;
+/** 连接次数  */
+@property(nonatomic,assign)int connectNum;
+/** host  */
+@property(nonatomic,copy)NSString *host;
+/** port  */
+@property(nonatomic,assign)int port;
 
 @property (weak, nonatomic) IBOutlet UITextField *allocerTextField;
 @property (weak, nonatomic) IBOutlet UITextField *userFromTextField;
@@ -64,6 +72,13 @@
     [self networkReachability];
     
 }
+// 断开连接
+- (IBAction)didConnectBtnClick:(id)sender {
+    [self.socket disconnect];
+}
+
+
+
 - (void)connectToHost{
     // 获取分配的 主机ip 和 端口号
     NSString *urlStr = self.allocerTextField.text;
@@ -78,14 +93,15 @@
     [mng GET:urlStr parameters:nil progress:nil success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject) {
         NSLog(@"responseObject-----%@",responseObject);
         NSString *responseObjectStr = [[NSString alloc] initWithData:responseObject encoding:NSUTF8StringEncoding];
+        NSLog(@"--%@",responseObjectStr);
         if (responseObjectStr.length < 3) {
             return ;
         }
         NSArray *hostArr = [responseObjectStr componentsSeparatedByString:@":"];
         NSString *host = hostArr[0];
-        
+        self.host = host;
         int port = [hostArr[1] intValue];
-        
+        self.port = port;
         NSLog(@"%@---%d",host,port);
         
         // 创建一个Socket对象
@@ -158,14 +174,23 @@
     [self.messages addObject:@"绑定用户..."];
     [self messageTableViewReloadData];
     //绑定用户
-    [self.socket writeData:[MessageDataPacketTool bindDataWithUserId:[NSString stringWithFormat:@"%@",self.userFromTextField.text]] withTimeout:-1 tag:222];
+    self.userId = [NSString stringWithFormat:@"%@",self.userFromTextField.text];
+    [self.socket writeData:[MessageDataPacketTool bindDataWithUserId:self.userId andIsUnbindFlag:NO] withTimeout:-1 tag:222];
 }
+
 - (IBAction)unbindBtnClick:(id)sender {
-    
+    if (self.userId) {
+        [self.messages addObject:@"解绑用户"];
+        [self messageTableViewReloadData];
+        //绑定用户
+        [self.socket writeData:[MessageDataPacketTool bindDataWithUserId:self.userId andIsUnbindFlag:YES] withTimeout:-1 tag:222];
+        self.userId = nil;
+    }
 }
 
 - (void)touchesBegan:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event{
-    [self.messageTextField endEditing:YES];
+    
+    [self.view endEditing:YES];
 }
 
 - (void)viewDidLoad {
@@ -233,12 +258,19 @@
 // 连接主机成功
 -(void)socket:(GCDAsyncSocket *)sock didConnectToHost:(NSString *)host port:(uint16_t)port{
     NSLog(@"连接主机成功");
-    
+    self.title = @"连接成功";
     [self.messages addObject:@"socketDidConnectToHost"];
     [self messageTableViewReloadData];
-    self.socket = sock;
-    // 发送协议报文
-    [sock writeData:[MessageDataPacketTool handshakeMessagePacketData] withTimeout:-1 tag:222];
+    if (![MessageDataPacketTool isFastConnect]) {
+        [self.messages addObject:@"发送握手数据"];
+        [self messageTableViewReloadData];
+        [sock writeData:[MessageDataPacketTool handshakeMessagePacketData] withTimeout:-1 tag:222];
+        return;
+    }
+    
+    [self.messages addObject:@"发送快速重连数据"];
+    [self messageTableViewReloadData];
+    [sock writeData:[MessageDataPacketTool fastConnect] withTimeout:-1 tag:222];
     
 }
 - (void) messageTableViewReloadData{
@@ -251,12 +283,21 @@
 
 // 与主机断开连接
 -(void)socketDidDisconnect:(GCDAsyncSocket *)sock withError:(NSError *)err{
+    
     if(err){
         NSLog(@"断开连接 %@",err);
-        
-        [self.messages addObject:@"socketDidDisconnect"];
-        [self messageTableViewReloadData];
+        self.title = @"连接错误";
+        _connectNum ++;
+        if (_connectNum < MPMaxConnectTimes) {
+            sleep(_connectNum+2);
+            NSError *error = nil;
+            [_socket connectToHost:self.host onPort:self.port error:&error];
+        }
+    } else{
+        self.title = @"断开连接";
     }
+    [self.messages addObject:@"socketDidDisconnect"];
+    [self messageTableViewReloadData];
 }
 
 // 数据成功发送到服务器
@@ -327,25 +368,28 @@
         case MpushMessageBodyCMDBind: //绑定
             
             break;
-        case MpushMessageBodyCMDUNbind: //解绑
+        case MpushMessageBodyCMDUnbind: //解绑
             
             break;
-        case MpushMessageBodyCMDUNFastConnect: //快速重连
+        case MpushMessageBodyCMDFastConnect: //快速重连
+        
+            NSLog(@"MpushMessageBodyCMDUNFastConnect");
+            [self.messages addObject:@"快速重连成功"];
+            [self messageTableViewReloadData];
+            break;
+        
+        case MpushMessageBodyCMDStop: //暂停
             
             break;
-        case MpushMessageBodyCMDUNStop: //暂停
+        case MpushMessageBodyCMDResume: //重新开始
             
             break;
-        case MpushMessageBodyCMDUNResume: //重新开始
-            
-            break;
-        case MpushMessageBodyCMDUNError: //错误
+        case MpushMessageBodyCMDError: //错误
             [MessageDataPacketTool errorWithBody:body_data];
             break;
         case MpushMessageBodyCMDOk: //ok
             //                        [MessageDataPacketTool okWithBody:body_data];
-            NSLog(@"======绑定成功=========");
-            [self.messages addObject:@"成功绑定用户!"];
+            [self.messages addObject:@"操作成功!"];
             [self messageTableViewReloadData];
             break;
             
@@ -446,6 +490,7 @@
 - (IBAction)senfBtnClick:(id)sender {
     [self sendPushMessage];
 }
+
 
 
 

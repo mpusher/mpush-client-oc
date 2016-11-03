@@ -105,11 +105,11 @@ typedef NS_ENUM(NSInteger, MpushMessageBodyCMD) {
     MpushMessageBodyCMDLogin = 3,    // 登录
     MpushMessageBodyCMDLogout = 4,   //退出
     MpushMessageBodyCMDBind = 5,    // 绑定
-    MpushMessageBodyCMDUNbind = 6,    // 解除绑定
-    MpushMessageBodyCMDUNFastConnect = 7,    //快速重连
-    MpushMessageBodyCMDUNStop = 8,    //暂停
-    MpushMessageBodyCMDUNResume = 9,    // 重新开始
-    MpushMessageBodyCMDUNError = 10,    // 错误
+    MpushMessageBodyCMDUnbind = 6,    // 解除绑定
+    MpushMessageBodyCMDFastConnect = 7,    //快速重连
+    MpushMessageBodyCMDStop = 8,    //暂停
+    MpushMessageBodyCMDResume = 9,    // 重新开始
+    MpushMessageBodyCMDError = 10,    // 错误
     MpushMessageBodyCMDOk= 11,    //OK
     MpushMessageBodyCMDHttp = 12,    // Http
     MpushMessageBodyCMDPush = 15,    // 推送
@@ -170,7 +170,7 @@ static NSString *const pubkey = @"-------BEGIN PUBLIC KEY-----\nMIGfMA0GCSqGSIb3
  *
  *  @param userId 用户id
  */
-+ (NSData *)bindDataWithUserId:(NSString *)userId;
++ (NSData *)bindDataWithUserId:(NSString *)userId andIsUnbindFlag:(BOOL)isUnbindFlag;
 
 
 /**
@@ -253,7 +253,14 @@ static NSString *const pubkey = @"-------BEGIN PUBLIC KEY-----\nMIGfMA0GCSqGSIb3
  */
 + (NSData *) processFlagWithPacket:(IP_PACKET)packet andBodyData:(NSData *)body_data;
 
-
+/**
+ *  是否快速重连 yes快速重连
+ */
++ (BOOL)isFastConnect;
+/**     
+ *快速重连   
+ */
++ (NSData *)fastConnect;
 
 
 @end
