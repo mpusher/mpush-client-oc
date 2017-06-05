@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0D28AC721EE5472600933091 /* GSKeyChain.m in Sources */ = {isa = PBXBuildFile; fileRef = 0D28AC6F1EE5472600933091 /* GSKeyChain.m */; };
+		0D28AC731EE5472600933091 /* GSKeyChainDataManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 0D28AC711EE5472600933091 /* GSKeyChainDataManager.m */; };
 		0D591C3A1D741B900064A90C /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 0D591C391D741B900064A90C /* main.m */; };
 		0D591C3D1D741B900064A90C /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 0D591C3C1D741B900064A90C /* AppDelegate.m */; };
 		0D591C401D741B900064A90C /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 0D591C3F1D741B900064A90C /* ViewController.m */; };
@@ -48,6 +50,10 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		0D28AC6E1EE5472600933091 /* GSKeyChain.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GSKeyChain.h; sourceTree = "<group>"; };
+		0D28AC6F1EE5472600933091 /* GSKeyChain.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GSKeyChain.m; sourceTree = "<group>"; };
+		0D28AC701EE5472600933091 /* GSKeyChainDataManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GSKeyChainDataManager.h; sourceTree = "<group>"; };
+		0D28AC711EE5472600933091 /* GSKeyChainDataManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GSKeyChainDataManager.m; sourceTree = "<group>"; };
 		0D591C351D741B900064A90C /* mpush-client-ios(OC).app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "mpush-client-ios(OC).app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		0D591C391D741B900064A90C /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		0D591C3B1D741B900064A90C /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
@@ -120,6 +126,17 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		0D28AC6D1EE5472600933091 /* GSKeyChain */ = {
+			isa = PBXGroup;
+			children = (
+				0D28AC6E1EE5472600933091 /* GSKeyChain.h */,
+				0D28AC6F1EE5472600933091 /* GSKeyChain.m */,
+				0D28AC701EE5472600933091 /* GSKeyChainDataManager.h */,
+				0D28AC711EE5472600933091 /* GSKeyChainDataManager.m */,
+			);
+			path = GSKeyChain;
+			sourceTree = "<group>";
+		};
 		0D591C2C1D741B900064A90C = {
 			isa = PBXGroup;
 			children = (
@@ -156,7 +173,7 @@
 				0D591C441D741B900064A90C /* Assets.xcassets */,
 				0D591C461D741B900064A90C /* LaunchScreen.storyboard */,
 				0D591C491D741B900064A90C /* Info.plist */,
-				0D591C6B1D7426410064A90C /* 3Lib */,
+				0D591C6B1D7426410064A90C /* 3rd Lib */,
 				0D591C381D741B900064A90C /* Supporting Files */,
 			);
 			path = "mpush-client-ios(OC)";
@@ -188,15 +205,17 @@
 			path = "mpush-client-ios(OC)UITests";
 			sourceTree = "<group>";
 		};
-		0D591C6B1D7426410064A90C /* 3Lib */ = {
+		0D591C6B1D7426410064A90C /* 3rd Lib */ = {
 			isa = PBXGroup;
 			children = (
+				0D28AC6D1EE5472600933091 /* GSKeyChain */,
 				0D591C6C1D7426410064A90C /* AFNetworking */,
 				0D591C7D1D7426410064A90C /* CocoaAsyncSocket */,
 				0D591C841D7426410064A90C /* LFCGzipUtility */,
 				0D591C871D7426410064A90C /* rfi_reader */,
 				0D591C8C1D7426410064A90C /* RSA */,
 			);
+			name = "3rd Lib";
 			path = 3Lib;
 			sourceTree = "<group>";
 		};
@@ -397,6 +416,7 @@
 				0D591C941D7426410064A90C /* AFURLSessionManager.m in Sources */,
 				0D591C401D741B900064A90C /* ViewController.m in Sources */,
 				0D591C3D1D741B900064A90C /* AppDelegate.m in Sources */,
+				0D28AC731EE5472600933091 /* GSKeyChainDataManager.m in Sources */,
 				0D591C901D7426410064A90C /* AFNetworkReachabilityManager.m in Sources */,
 				0D591C3A1D741B900064A90C /* main.m in Sources */,
 				0D591C9A1D7426410064A90C /* RFIWriter.m in Sources */,
@@ -407,6 +427,7 @@
 				0D591C9F1D74264A0064A90C /* MessageDataPacketTool.m in Sources */,
 				0D591C931D7426410064A90C /* AFURLResponseSerialization.m in Sources */,
 				0D591C961D7426410064A90C /* GCDAsyncSocket.m in Sources */,
+				0D28AC721EE5472600933091 /* GSKeyChain.m in Sources */,
 				0D591C991D7426410064A90C /* RFIReader.m in Sources */,
 				0D591C8F1D7426410064A90C /* AFHTTPSessionManager.m in Sources */,
 			);

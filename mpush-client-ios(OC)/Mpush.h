@@ -9,6 +9,7 @@
 #ifndef Mpush_h
 #define Mpush_h
 
+#define DEVICE_TYPE @"ios"
 #define appVersion @"9.2.1";
 
 #define MPUserDefaults  [NSUserDefaults standardUserDefaults]

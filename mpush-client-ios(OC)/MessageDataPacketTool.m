@@ -8,6 +8,7 @@
 
 #import "MessageDataPacketTool.h"
 #import <CommonCrypto/CommonCryptor.h>
+#import "GSKeyChainDataManager.h"
 
 
 @implementation MessageDataPacketTool
@@ -60,13 +61,12 @@
     RFIWriter *writerPacket = [RFIWriter writerWithData:bodyData];
     
     //设备唯一标识
-    NSString *identifierForVendor = [[UIDevice currentDevice].identifierForVendor UUIDString];
+    NSString *identifierForVendor = [GSKeyChainDataManager readUUID];
     [MPUserDefaults setObject:identifierForVendor forKey:MPDeviceId];
-    
     [writerPacket writeString:identifierForVendor];
     
     //设备名称
-    NSString *iosStr = @"ios";
+    NSString *iosStr = DEVICE_TYPE;
     [writerPacket writeString:iosStr];
     
     //设备版本号
@@ -224,8 +224,6 @@
         bodyData = [MessageDataPacketTool aesDecriptWithEncryptData:body_data withIv:iv andKey:clientKey];
         bodyData = [LFCGzipUtility ungzipData:bodyData];
     }
-    
-    
     HAND_SUCCESS_BODY handSuccessBody;
     
     //serverKey的长度
@@ -572,22 +570,6 @@
     [ipHeaderData appendData:enData];
     
     return ipHeaderData;
-    
-//    NSData *sessionIdData = [sessionId dataUsingEncoding:NSUTF8StringEncoding];
-//    short sessionIdDataLength = (short)sessionIdData.length;
-//    HTONS(sessionIdDataLength);
-//    NSData *sessionIdDataLengthData = [NSData dataWithBytes:&sessionIdDataLength length:sizeof(sessionIdDataLength)];
-//    [bodyData appendData:sessionIdDataLengthData];
-//    [bodyData appendData:sessionIdData];
-    
-    //    NSString *aliasStr = @"0";
-//    NSData *deviceIdData = [deviceId dataUsingEncoding:NSUTF8StringEncoding];
-//    short deviceIdDataLength = (short)deviceIdData.length;
-//    HTONS(deviceIdDataLength);
-//    NSData *deviceIdDataLengthData = [NSData dataWithBytes:&deviceIdDataLength length:sizeof(deviceIdDataLength)];
-//    [bodyData appendData:deviceIdDataLengthData];
-//    [bodyData appendData:deviceIdData];
-//    return  bodyData;
 }
 
 /**
@@ -621,7 +603,6 @@
     int8_t *iv = (int8_t *)[ivData bytes];
     NSData *sessionKeyData = [MPUserDefaults objectForKey:MPSessionKeyData];
     int8_t *sessionKey = (int8_t *)sessionKeyData.bytes;
-    
     bodyData = body_data;
     if ((packet.flags&1) != 0) { //解密
         bodyData = [MessageDataPacketTool aesDecriptWithEncryptData:body_data withIv:iv andKey:sessionKey];
@@ -629,8 +610,6 @@
     if (((packet.flags&2) != 0)) { // 解压缩
         bodyData = [LFCGzipUtility ungzipData:bodyData];
     }
-//    [MessageDataPacketTool chatDataSuccessWithData:bodyData];
-    
     return bodyData;
 }
 
@@ -642,7 +621,6 @@
  *  @return 错误信息（结构体）
  */
 + (ERROR_MESSAGE) errorWithBody:(NSData *)body{
-    
     ERROR_MESSAGE errorMessage;
     NSData *cmd = [body subdataWithRange:NSMakeRange(0, 1)];
     int8_t cmdInt8 ;

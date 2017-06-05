@@ -182,7 +182,7 @@
     if (self.userId) {
         [self.messages addObject:@"解绑用户"];
         [self messageTableViewReloadData];
-        //绑定用户
+        //解绑用户
         [self.socket writeData:[MessageDataPacketTool bindDataWithUserId:self.userId andIsUnbindFlag:YES] withTimeout:-1 tag:222];
         self.userId = nil;
     }
