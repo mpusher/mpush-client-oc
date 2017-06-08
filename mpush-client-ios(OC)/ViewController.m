@@ -224,8 +224,8 @@
     NSData *strDataLengthData = [NSData dataWithBytes:&strDataLength length:sizeof(strDataLength)];
     [dataaa appendData:strDataLengthData];
     [dataaa appendData:strData];
-    
-    NSString *urlStr = [NSString stringWithFormat:@"%@",PUSH_HOST_ADDRESS];
+//    PUSH_HOST_ADDRESS
+    NSString *urlStr = [NSString stringWithFormat:@"%@",self.allocerTextField.text];
     
     [self.socket writeData:[MessageDataPacketTool chatDataWithBody:dataaa andUrlStr:urlStr] withTimeout:-1 tag:222];
     
