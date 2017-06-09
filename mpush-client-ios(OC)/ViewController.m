@@ -77,8 +77,6 @@
     [self.socket disconnect];
 }
 
-
-
 - (void)connectToHost{
     // 获取分配的 主机ip 和 端口号
     NSString *urlStr = self.allocerTextField.text;
@@ -225,7 +223,7 @@
     [dataaa appendData:strDataLengthData];
     [dataaa appendData:strData];
 //    PUSH_HOST_ADDRESS
-    NSString *urlStr = [NSString stringWithFormat:@"%@",self.allocerTextField.text];
+    NSString *urlStr = [NSString stringWithFormat:@"%@/push",self.allocerTextField.text];
     
     [self.socket writeData:[MessageDataPacketTool chatDataWithBody:dataaa andUrlStr:urlStr] withTimeout:-1 tag:222];
     
