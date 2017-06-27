@@ -1,6 +1,6 @@
 ### 一、此demo依赖AFNetworking、CocoaAsyncSocket、LFCGzipUtility 和rfi_reader四个三方框架
 
-- 1、afn 用于使用http代理向服务端发送数据 和 监测网络变化
+- 1、afn 用于发送网络请求 和 监测网络变化
 - 2、CocoaAsyncSocket 用于建立socket连接
 - 3、LFCGzipUtility 用于压缩和解压缩数据
 - 4、rfi_reader 用于拼接数据
@@ -23,9 +23,9 @@
     http代理响应: + (HTTP_RESPONES_BODY)chatDataSuccessWithData:(NSData *)bodyData;
     处理收到的push消息:  + (id)processRecievePushMessageWithPacket:(IP_PACKET)packet andData:(NSData *)body_data;新的
 ### 四、使用方法：
-    1、建立连接 
-    2、绑定用户
-    3、收发消息
+    1、建立连接 （发送`握手`数据）
+    2、绑定用户 （发送`绑定`数据）
+    3、收发消息 （发送`http代理`数据、`处理收到的push消息`）
 ## 使用注意：
 1、需要更换与服务对应的 IP地址  和 MessageDataPacketTool.h文件中的pubkey(握手时RSA加密所需的公钥)
 2、iOS10以上需要打开keychain Sharing的开关 -->`在xcode的Ttarget中选中Capabilities找到keychain Sharing选项 打开开关即可`
