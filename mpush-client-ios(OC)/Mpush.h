@@ -13,8 +13,9 @@
 #define appVersion @"9.2.1";
 
 #define MPUserDefaults  [NSUserDefaults standardUserDefaults]
-#define  MPIvData @"BCJIvData"
-#define  MPClientKeyData @"BCJClientKeyData"
+#define MPIvData @"BCJIvData"
+#define MPClientKeyData @"BCJClientKeyData"
+#define MPHeartbeatData @"BCJHeartbeatData"
 #define PUSH_HOST_ADDRESS @"http://103.246.161.44:9999/push"
 
 #define  MPSessionKeyData @"BCJSessionKeyData"

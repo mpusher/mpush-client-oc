@@ -281,7 +281,7 @@
 
 // 与主机断开连接
 -(void)socketDidDisconnect:(GCDAsyncSocket *)sock withError:(NSError *)err{
-    
+    [self clearHeartBeatTimer];
     if(err){
         NSLog(@"断开连接 %@",err);
         self.title = @"连接错误";
@@ -342,10 +342,8 @@
         packet = [MessageDataPacketTool handShakeSuccessResponesWithData:self.messageBodyData];
     }
     self.messageBodyData = nil;
-    
     //解密以前的body
     NSData *body_data = [NSData dataWithBytes:packet.body length:packet.length];
-    NSLog(@"bodyData--%@--%d",body_data,packet.length);
     switch (packet.cmd) {
             
         case MpushMessageBodyCMDHandShakeSuccess:
@@ -374,19 +372,21 @@
             NSLog(@"MpushMessageBodyCMDUNFastConnect");
             [self.messages addObject:@"快速重连成功"];
             [self messageTableViewReloadData];
+            [self addHeartBeatTimer:[MPUserDefaults doubleForKey:MPHeartbeatData]];
             break;
         
         case MpushMessageBodyCMDStop: //暂停
-            
             break;
+            
         case MpushMessageBodyCMDResume: //重新开始
-            
             break;
+            
         case MpushMessageBodyCMDError: //错误
             [MessageDataPacketTool errorWithBody:body_data];
             break;
+            
         case MpushMessageBodyCMDOk: //ok
-            //                        [MessageDataPacketTool okWithBody:body_data];
+//            [MessageDataPacketTool okWithBody:body_data];
             [self.messages addObject:@"操作成功!"];
             [self messageTableViewReloadData];
             break;
@@ -420,6 +420,8 @@
  */
 - (void)heartbeatSend{
     
+    [self.messages addObject:@"发送心跳"];
+    [self messageTableViewReloadData];
     [_socket writeData:[MessageDataPacketTool heartbeatPacketData] withTimeout:-1 tag:123];
 }
 
@@ -439,6 +441,7 @@
     [self messageTableViewReloadData];
     NSLog(@"content--%@",contentDict);
 }
+
 /*!
  * @brief 把格式化的JSON格式的字符串转换成字典
  * @param jsonString JSON格式的字符串
@@ -476,14 +479,28 @@
  *  @param bodyData 握手ok的bodyData
  */
 - (void) processHandShakeDataWithPacket:(IP_PACKET)packet andData:(NSData *)body_data{
-    
-    HAND_SUCCESS_BODY handSuccessBody = [MessageDataPacketTool HandSuccessBodyDataWithData:body_data andPacket:packet];
-    
-    //添加计时器
-    _timer = [NSTimer timerWithTimeInterval:handSuccessBody.heartbeat/1000.0 target:self selector:@selector(heartbeatSend) userInfo:nil repeats:YES];
-    [[NSRunLoop currentRunLoop] addTimer:_timer forMode:NSDefaultRunLoopMode];
-    
+    NSLog(@"currentThread--%@",[NSThread currentThread]);
+    [MessageDataPacketTool HandSuccessBodyDataWithData:body_data andPacket:packet];
+    [self addHeartBeatTimer:[MPUserDefaults doubleForKey:MPHeartbeatData]];
 }
+
+/// 增加心跳定时器
+- (void)addHeartBeatTimer:(NSTimeInterval)time{
+    NSLog(@"MPHeartbeatData--%.2f",[MPUserDefaults doubleForKey:MPHeartbeatData]);
+    dispatch_async(dispatch_get_main_queue(), ^{
+        _timer = [NSTimer timerWithTimeInterval:time target:self selector:@selector(heartbeatSend) userInfo:nil repeats:YES];
+        [[NSRunLoop currentRunLoop] addTimer:_timer forMode:NSDefaultRunLoopMode];
+        });
+}
+
+/// 清除心跳定时器
+- (void)clearHeartBeatTimer{
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [_timer invalidate];
+        _timer = nil;
+        });
+}
+
 // 发送消息按钮点击
 - (IBAction)senfBtnClick:(id)sender {
     [self sendPushMessage];

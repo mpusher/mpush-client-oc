@@ -240,6 +240,7 @@
     [heartbeatData getBytes:&heartbeat length:sizeof(heartbeat)];
     NTOHL(heartbeat);
     handSuccessBody.heartbeat = heartbeat;
+    [MPUserDefaults setDouble:handSuccessBody.heartbeat/1000.0 forKey:MPHeartbeatData];
     
     //sessionId的长度
     NSData *sessionIdLengthData = [bodyData subdataWithRange:NSMakeRange(6+serverKeyLength, 2)];
