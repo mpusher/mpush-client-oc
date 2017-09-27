@@ -58,6 +58,14 @@
 
 @implementation ViewController
 
+- (NSMutableData *)messageBodyData{
+    
+    if (_messageBodyData == nil) {
+        _messageBodyData = [[NSMutableData alloc] init];
+    }
+    return _messageBodyData ;
+}
+
 - (NSMutableArray *)messages{
     if (_messages == nil) {
         _messages = [[NSMutableArray alloc] init];
@@ -89,9 +97,7 @@
     NSString *currentVersion = [infoDict objectForKey:@"CFBundleShortVersionString"];
     [mng.requestSerializer setValue:currentVersion forHTTPHeaderField:@"version"];
     [mng GET:urlStr parameters:nil progress:nil success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject) {
-        NSLog(@"responseObject-----%@",responseObject);
         NSString *responseObjectStr = [[NSString alloc] initWithData:responseObject encoding:NSUTF8StringEncoding];
-        NSLog(@"--%@",responseObjectStr);
         if (responseObjectStr.length < 3) {
             return ;
         }
