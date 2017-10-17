@@ -216,22 +216,14 @@
 - (void) sendPushMessage{
     
     // 通过http代理发送数据
-    NSMutableData *dataaa = [NSMutableData data];
     NSMutableDictionary *contentDict = [NSMutableDictionary dictionary];
     contentDict[@"userId"] = self.userToTextField.text;
     contentDict[@"hello"] = self.messageTextField.text;
-    NSData *contentJsonData = [NSJSONSerialization dataWithJSONObject:contentDict options:NSJSONWritingPrettyPrinted error:nil];
-    NSData *strData = contentJsonData;
     
-    short strDataLength = (short)strData.length;
-    HTONS(strDataLength);
-    NSData *strDataLengthData = [NSData dataWithBytes:&strDataLength length:sizeof(strDataLength)];
-    [dataaa appendData:strDataLengthData];
-    [dataaa appendData:strData];
 //    PUSH_HOST_ADDRESS
     NSString *urlStr = [NSString stringWithFormat:@"%@/push",self.allocerTextField.text];
     
-    [self.socket writeData:[MessageDataPacketTool chatDataWithBody:dataaa andUrlStr:urlStr] withTimeout:-1 tag:222];
+    [self.socket writeData:[MessageDataPacketTool chatDataWithBody:contentDict andUrlStr:urlStr] withTimeout:-1 tag:222];
     
     [self.messages addObject:[NSString stringWithFormat:@"发送数据%@",self.messageTextField.text]];
     self.messageTextField.text = nil;
@@ -264,7 +256,6 @@
     NSLog(@"连接主机成功");
     self.title = @"连接成功";
     [self.messages addObject:@"socketDidConnectToHost"];
-    [self messageTableViewReloadData];
     if (![MessageDataPacketTool isFastConnect]) {
         [self.messages addObject:@"发送握手数据"];
         [self messageTableViewReloadData];

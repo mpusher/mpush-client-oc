@@ -180,7 +180,7 @@ static NSString *const pubkey = @"-------BEGIN PUBLIC KEY-----\nMIGfMA0GCSqGSIb3
  *
  *  @return     完整的聊天数据包
  */
-+ (NSData *)chatDataWithBody:(NSData *)messageBody andUrlStr:(NSString *)urlStr;
++ (NSData *)chatDataWithBody:(NSDictionary *)contentDict andUrlStr:(NSString *)urlStr;
 
 /**
  *  请求成功

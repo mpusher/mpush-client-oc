@@ -367,7 +367,20 @@
  *
  *  @return 聊天data
  */
-+ (NSData *)chatDataWithBody:(NSData *)messageBody andUrlStr:(NSString *)urlStr{
++ (NSData *)chatDataWithBody:(NSDictionary *)contentDict andUrlStr:(NSString *)urlStr{
+    
+    // 通过http代理发送数据
+    NSMutableData *dataaa = [NSMutableData data];
+//    NSMutableDictionary *contentDict = [NSMutableDictionary dictionary];
+    NSData *contentJsonData = [NSJSONSerialization dataWithJSONObject:contentDict options:NSJSONWritingPrettyPrinted error:nil];
+    NSData *strData = contentJsonData;
+    
+    short strDataLength = (short)strData.length;
+    HTONS(strDataLength);
+    NSData *strDataLengthData = [NSData dataWithBytes:&strDataLength length:sizeof(strDataLength)];
+    [dataaa appendData:strDataLengthData];
+    [dataaa appendData:strData];
+    
     NSData *ivData = [MPUserDefaults objectForKey:MPIvData];
     int8_t *iv = (int8_t *)[ivData bytes];
     NSData *sessionKeyData = [MPUserDefaults objectForKey:MPSessionKeyData];
@@ -388,7 +401,7 @@
     [writerPacket writeString:headersStr];
     
     //body
-    [writerPacket writeBytes:messageBody];
+    [writerPacket writeBytes:dataaa];
     
     //加密
     NSData *enBodyData = [MessageDataPacketTool aesEncriptData:writerPacket.data WithIv:iv andKey:sessionKey];
