@@ -45,6 +45,7 @@
 
 - (void)writeInt32:(int32_t)value
 {
+    HTONL(value);
     [self writeBytes:(const char *)&value length:sizeof(int32_t)];
 }
 
@@ -55,11 +56,13 @@
 
 - (void)writeInt16:(int16_t)value
 {
+    HTONS(value);
     [self writeBytes:(const char *)&value length:sizeof(int16_t)];
 }
 
 - (void)writeUInt32:(uint32_t)value
 {
+    HTONL(value);
     [self writeBytes:(const char *)&value length:sizeof(uint32_t)];
 }
 

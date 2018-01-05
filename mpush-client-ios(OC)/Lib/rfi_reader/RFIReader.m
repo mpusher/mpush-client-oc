@@ -1,9 +1,9 @@
 //
 //  RFIReader.m
-//  RfiFormat
+//  mpush-client
 //
-//  Created by Mgen on 14-7-1.
-//  Copyright (c) 2014年 Mgen. All rights reserved.
+//  Created by OHUN on 16/6/3.
+//  Copyright © 2016年 OHUN. All rights reserved.
 //
 
 #import "RFIReader.h"
@@ -26,7 +26,7 @@
     return self;
 }
 
-- (NSData*)readBytes:(uint32_t)len
+- (NSData*)readData:(uint32_t)len
 {
     if(!len) return nil;
     NSData *data = [_data subdataWithRange:NSMakeRange(_poz, len)];
@@ -34,52 +34,58 @@
     return data;
 }
 
-- (NSData*)readPrefixedBytes
+- (const char*)readBytes
 {
-    uint32_t len = [self readUInt32];
-    return [self readBytes:len];
+    NSData *data = [self readData];
+    return [data bytes];
 }
 
-- (int32_t)readInt32
+- (NSData*)readData
 {
-    char *ptr = _pointer + _poz;
-    _poz += sizeof(int32_t);
-    return *(int32_t*)ptr;
-}
-
-- (int64_t)readInt64
-{
-    char *ptr = _pointer + _poz;
-    _poz += sizeof(int64_t);
-    return *(int64_t*)ptr;
+    int16_t len = [self readInt16];
+    return [self readData:len];
 }
 
 - (int16_t)readInt16
 {
     char *ptr = _pointer + _poz;
     _poz += sizeof(int16_t);
-    return *(int16_t*)ptr;
+    return HTONS(*(int16_t*)ptr);
 }
 
-- (uint32_t)readUInt32
+- (int32_t)readInt32
 {
     char *ptr = _pointer + _poz;
-    _poz += sizeof(uint32_t);
-    return *(uint32_t*)ptr;
+    _poz += sizeof(int32_t);
+    return HTONL(*(int32_t*)ptr);
 }
 
-- (uint64_t)readUInt64
+- (int64_t)readInt64
 {
     char *ptr = _pointer + _poz;
-    _poz += sizeof(uint64_t);
-    return *(uint64_t*)ptr;
+    _poz += sizeof(int64_t);
+    return HTONLL(*(int64_t*)ptr);
 }
 
 - (uint16_t)readUInt16
 {
     char *ptr = _pointer + _poz;
     _poz += sizeof(uint16_t);
-    return *(uint16_t*)ptr;
+    return HTONS(*(uint16_t*)ptr);
+}
+
+- (uint32_t)readUInt32
+{
+    char *ptr = _pointer + _poz;
+    _poz += sizeof(uint32_t);
+    return HTONL(*(uint32_t*)ptr);
+}
+
+- (uint64_t)readUInt64
+{
+    char *ptr = _pointer + _poz;
+    _poz += sizeof(uint64_t);
+    return HTONLL(*(uint64_t*)ptr);
 }
 
 - (char)readByte
@@ -100,20 +106,21 @@
 {
     char *ptr = _pointer + _poz;
     _poz += sizeof(float);
-    return *(float*)ptr;
+    return HTONLL(*(float*)ptr);
 }
 
 - (double)readDouble
 {
     char *ptr = _pointer + _poz;
     _poz += sizeof(double);
-    return *(double*)ptr;
+    return HTONLL(*(double*)ptr);
 }
 
 - (NSString*)readString
 {
-    NSData *data = [self readPrefixedBytes];
-    return [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
+    NSData *data = [self readData];
+    if(data) return [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
+    return nil;
 }
 
 @end

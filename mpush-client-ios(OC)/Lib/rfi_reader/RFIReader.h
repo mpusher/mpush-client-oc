@@ -1,10 +1,13 @@
 //
 //  RFIReader.h
-//  RfiFormat
+//  mpush-client
 //
-//  Created by Mgen on 14-7-1.
-//  Copyright (c) 2014年 Mgen. All rights reserved.
+//  Created by OHUN on 16/6/3.
+//  Copyright © 2016年 OHUN. All rights reserved.
 //
+
+#ifndef RFIReader_h
+#define RFIReader_h
 
 #import <Foundation/Foundation.h>
 
@@ -18,7 +21,8 @@
 + (instancetype)readerWithData:(NSData*)data;
 - (instancetype)initWithData:(NSData*)data;
 
-- (NSData*)readBytes:(uint32_t)len;
+- (NSData*)readData:(uint32_t)len;
+- (const char*)readBytes;
 - (int32_t)readInt32;
 - (int64_t)readInt64;
 - (int16_t)readInt16;
@@ -28,7 +32,9 @@
 - (char)readByte;
 - (BOOL)readBool;
 - (NSString*)readString;
-- (NSData*)readPrefixedBytes;
+- (NSData*)readData;
 - (float)readFloat;
 - (double)readDouble;
 @end
+
+#endif /* RFIReader_h */

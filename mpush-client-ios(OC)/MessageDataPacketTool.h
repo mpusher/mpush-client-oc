@@ -13,18 +13,6 @@
 #import "Mpush.h"
 #import "LFCGzipUtility.h"
 
-typedef struct _ipbody
-{
-    char *deviceId;         //设备id
-    char *osName;           // 设备名称
-    char *osVersion;        //设备版本
-    char *clientVersion;    //客户端版本
-    int8_t iv[16] ;         //aes加密指数 （16位随机数）
-    int8_t clientKey[16];   //aes加密key （16位随机数）
-    int minHeartbeat;       //最小心跳数（单位毫秒）
-    int maxHeartbeat;       //最大心跳数（单位毫秒）
-    long timestamp;         //时间戳
-}IP_BODY;
 
 typedef struct _iphdr
 {
@@ -34,16 +22,29 @@ typedef struct _iphdr
     int8_t flags;           //当前包使用的一些特性
     int sessionId;          //消息会话标示用于消息响应
     int8_t lrc;             //用于校验header
-    int8_t *body;
+    char *body;
     
 }IP_PACKET;
+
+typedef struct _ipbody
+{
+    char *deviceId;         //设备id
+    char *osName;           //设备名称
+    char *osVersion;        //设备版本
+    char *clientVersion;    //客户端版本
+    int8_t iv[MPAeslength] ;         //aes加密指数 （16位随机数）
+    int8_t clientKey[MPAeslength];   //aes加密key （16位随机数）
+    int minHeartbeat;       //最小心跳数（单位毫秒）
+    int maxHeartbeat;       //最大心跳数（单位毫秒）
+    long timestamp;         //时间戳
+}IP_BODY;
 
 /**
  *  握手成功的body
  */
 typedef struct _handSuccessBody
 {
-    int8_t serverKey[16];   //服务段返回的key 用于aes加密的
+    char *serverKey;   //服务段返回的key 用于aes加密的
     int heartbeat;          //消息会话标示用于消息响应
     char *sessionId;        //会话id
     long expireTime;        //失效时间
@@ -93,12 +94,23 @@ typedef struct OKMessage
  */
 typedef struct _httpResponesBody
 {
-    int statusCode;     //状态码
+    int32_t statusCode;     //状态码
     char *reasonPhrase;    //会话id
     char *headers;    //会话id
-    int8_t *body;   //响应体
+    char *body;   //响应体
     
 }HTTP_RESPONES_BODY;
+
+/**
+ *  kick user
+ */
+typedef struct _kickUser
+{
+    char *deviceId;
+    char *userId;
+    
+}KICK_USER_MESSAGE;
+
 
 typedef NS_ENUM(NSInteger, MpushMessageBodyCMD) {
     MpushMessageBodyCMDHandShakeSuccess = 2,	// 握手成功
@@ -111,11 +123,21 @@ typedef NS_ENUM(NSInteger, MpushMessageBodyCMD) {
     MpushMessageBodyCMDResume = 9,    // 重新开始
     MpushMessageBodyCMDError = 10,    // 错误
     MpushMessageBodyCMDOk= 11,    //OK
-    MpushMessageBodyCMDHttp = 12,    // Http
+    MpushMessageBodyCMDHttp = 12,    // Http代理
+    MpushMessageBodyCMDKick = 13,   // 踢人
     MpushMessageBodyCMDPush = 15,    // 推送
     MpushMessageBodyCMDChat = 19,    // 聊天
+    MpushMessageBodyCMDAck = 23,     // 确认收到
+    MpushMessageBodyCMDUnknown = -1     //未知消息
 };
 
+typedef enum {
+    MPFlagsNone = 0x0,
+    MPFlagsCrypto = 0x1,
+    MPFlagsCompress = 0x2,
+    MPFlagsBizAck = 0x4,
+    MPFlagsAutoAck = 0x8
+} MPFlags;
 
 
 static NSString *const pubkey = @"-------BEGIN PUBLIC KEY-----\nMIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCghPCWCobG8nTD24juwSVataW7\niViRxcTkey/B792VZEhuHjQvA3cAJgx2Lv8GnX8NIoShZtoCg3Cx6ecs+VEPD2f\nBcg2L4JK7xldGpOJ3ONEAyVsLOttXZtNXvyDZRijiErQALMTorcgi79M5uVX9/j\nMv2Ggb2XAeZhlLD28fHwIDAQAB\n-----END PUBLIC KEY-----";
@@ -147,7 +169,7 @@ static NSString *const pubkey = @"-------BEGIN PUBLIC KEY-----\nMIGfMA0GCSqGSIb3
  *
  *  @return 握手成功数据包的body
  */
-+ (HAND_SUCCESS_BODY) HandSuccessBodyDataWithData:(NSData *)body_data andPacket:(IP_PACKET)packet;
++ (HAND_SUCCESS_BODY) handSuccessBodyDataWithData:(NSData *)body_data andPacket:(IP_PACKET)packet;
 /**
  *  心跳包
  *
@@ -172,6 +194,12 @@ static NSString *const pubkey = @"-------BEGIN PUBLIC KEY-----\nMIGfMA0GCSqGSIb3
  */
 + (NSData *)bindDataWithUserId:(NSString *)userId andIsUnbindFlag:(BOOL)isUnbindFlag;
 
+/**
+ ack message data
+ 
+ @param sessionId 回话请求id
+ */
++ (NSData *)ackMessageWithSessionId:(int)sessionId;
 
 /**
  *  聊天消息数据包
@@ -210,29 +238,15 @@ static NSString *const pubkey = @"-------BEGIN PUBLIC KEY-----\nMIGfMA0GCSqGSIb3
  */
 + (OK_MESSAGE) okWithBody:(NSData *)body;
 
-
-
 /**
- *  aes加密方法
+ *  kickUser信息
  *
- *  @param enData 需要加密的数据
- *  @param iv     加密指数
- *  @param key    加密key
+ *  @param body kickUser信息body
  *
- *  @return 加密后的data
+ *  @return kickUser信息（结构体）
  */
-+ (NSData *) aesEncriptData:(NSData *)enData WithIv:(int8_t [])iv andKey:(int8_t [])key;
++ (KICK_USER_MESSAGE) kickUserWithBody:(NSData *)body;
 
-/**
- *  aes解密方法
- *
- *  @param enData 需要解密的数据
- *  @param iv     加密指数
- *  @param key    加密key
- *
- *  @return 解密后的data
- */
-+ (NSData *) aesDecriptWithEncryptData:(NSData *)encryptData withIv:(int8_t [])iv andKey:(int8_t[])key;
 /**
  *  处理收到的push消息
  *
