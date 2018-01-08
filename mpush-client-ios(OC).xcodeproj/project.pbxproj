@@ -190,6 +190,7 @@
 				0D591C441D741B900064A90C /* Assets.xcassets */,
 				0D591C461D741B900064A90C /* LaunchScreen.storyboard */,
 				0D591C491D741B900064A90C /* Info.plist */,
+				39ADFB3620030782003D4A1F /* SVProgressHUD */,
 				0D591C381D741B900064A90C /* Supporting Files */,
 			);
 			path = "mpush-client-ios(OC)";
@@ -243,7 +244,6 @@
 				39ADFB2B20030782003D4A1F /* CocoaAsyncSocket */,
 				39ADFB2E20030782003D4A1F /* GSKeyChain */,
 				39ADFB3320030782003D4A1F /* LFCGzipUtility */,
-				39ADFB3620030782003D4A1F /* SVProgressHUD */,
 			);
 			path = 3rdLib;
 			sourceTree = "<group>";
