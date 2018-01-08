@@ -28,19 +28,19 @@
 
 
 #define MPUserDefaults  [NSUserDefaults standardUserDefaults]
-#define MPIvData @"BCJIvData"
-#define MPClientKeyData @"BCJClientKeyData"
-#define  MPSessionKeyData @"BCJSessionKeyData"
-#define  MPSessionId @"BCJSessionId"
-#define  MPExpireTime @"BCJExpireTime"
-#define MPDeviceId @"identifierForVendor"
+#define MPIvData @"MPIvData"
+#define MPClientKeyData @"MPClientKeyData"
+#define  MPSessionKeyData @"MPSessionKeyData"
+#define  MPSessionId @"MPSessionId"
+#define  MPExpireTime @"MPExpireTime"
+#define MPDeviceId @"MPIdentifierForVendor"
 
 
 #ifdef DEBUG  //在调试模式下
-#define FFLog(fmt, ...) NSLog((@"[Line-%d] %s >>>>>>" fmt), __LINE__, __PRETTY_FUNCTION__,  ##__VA_ARGS__)
-#define FFInLog(fmt, ...) NSLog((@"[Line-%d] %s <<<<<<" fmt), __LINE__, __PRETTY_FUNCTION__,  ##__VA_ARGS__)
+#define MPLog(fmt, ...) NSLog((@"[Line-%d] %s >>>>>>" fmt), __LINE__, __PRETTY_FUNCTION__,  ##__VA_ARGS__)
+#define MPInLog(fmt, ...) NSLog((@"[Line-%d] %s <<<<<<" fmt), __LINE__, __PRETTY_FUNCTION__,  ##__VA_ARGS__)
 #else  //Release模式下
-#define FFLog(...)
+#define MPLog(...)
 #endif
 
 

@@ -14,9 +14,9 @@
 @property (nonatomic, assign)double expireTime;
 @property (nonatomic, copy) NSString *sessionId;
 
-- (instancetype)initWithSessionId:(NSString *)sessionId expireTime:(double)expireTime;
-- (void)saveSession;
-- (MPSessionStorage *)getSessionStorage;
++ (void)saveSessionWithSessionId:(NSString *)sessionId andExpireTime:(double)expireTime;
++ (NSDictionary *)getSessionStorage;
++ (void)clearSession;
 + (int)genSessionId;
 
 @end

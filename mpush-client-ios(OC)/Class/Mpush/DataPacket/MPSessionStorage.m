@@ -14,32 +14,24 @@
 
 @implementation MPSessionStorage
 
-- (instancetype)initWithSessionId:(NSString *)sessionId expireTime:(double)expireTime
++ (void)saveSessionWithSessionId:(NSString *)sessionId andExpireTime:(double)expireTime
 {
-    if (self = [super init]) {
-        self.sessionId = sessionId;
-        self.expireTime = expireTime;
-    }
-    return self;
-}
-
-- (void)saveSession
-{
-    [MPUserDefaults setObject:self.sessionId forKey:MPSessionId];
-    [MPUserDefaults setDouble:self.expireTime/1000.0 forKey:MPExpireTime];
+    [MPUserDefaults setObject:sessionId forKey:MPSessionId];
+    [MPUserDefaults setDouble:expireTime forKey:MPExpireTime];
     [MPUserDefaults synchronize];
 }
 
-- (MPSessionStorage *)getSessionStorage
++ (NSDictionary *)getSessionStorage
 {
+    NSMutableDictionary *dictionary = [NSMutableDictionary dictionary];
     double expireTime = [MPUserDefaults doubleForKey:MPExpireTime];
     NSString *sessionId = [MPUserDefaults objectForKey:MPSessionId];
-    self.expireTime = expireTime;
-    self.sessionId = sessionId;
-    return self;
+    dictionary[MPSessionId] = sessionId;
+    dictionary[MPExpireTime] = @(expireTime);
+    return dictionary;
 }
 
-- (void)clearSession
++ (void)clearSession
 {
     [MPUserDefaults removeObjectForKey:MPSessionId];
     [MPUserDefaults setDouble:0.0 forKey: MPExpireTime];

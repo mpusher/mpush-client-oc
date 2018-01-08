@@ -10,7 +10,7 @@
 
 @interface MPCipherBox : NSObject
 
-+ (NSData *)mixAesKey:(char *)serverKey;
++ (NSData *)mixAesKey:(int8_t *)serverKey;
 
 + (NSData *)generateRandomAesKeyWithLength:(int)aesIvLength;
 

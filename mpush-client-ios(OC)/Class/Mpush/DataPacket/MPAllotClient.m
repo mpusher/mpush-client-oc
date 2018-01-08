@@ -32,13 +32,13 @@
      success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject) {
          NSString *responseObjectStr = [[NSString alloc] initWithData:responseObject encoding:NSUTF8StringEncoding];
          if (responseObjectStr.length < 3) {
-             FFLog(@"ip and port are both null");
+             MPLog(@"ip and port are both null");
              return ;
          }
          if (success) success(responseObjectStr);
      }
      failure:^(NSURLSessionDataTask * _Nullable task, NSError * _Nonnull error) {
-         FFLog(@"get host and port exception occur");
+         MPLog(@"get host and port exception occur");
          if (failure) failure(error);
      }];
     

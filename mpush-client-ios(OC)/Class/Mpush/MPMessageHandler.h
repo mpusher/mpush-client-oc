@@ -16,11 +16,14 @@ typedef void(^FailureCallBack)(id failureContent);
 @protocol MPMessageHandlerDelegate<NSObject>
 
 @optional
-
 /**
- 绑定用户成功回调
+ 绑定用户成功
  */
 -(void)messageHandler:(MPMessageHandler *)handler didBindUser:(NSString *)userId;
+/**
+ 解除绑定用户成功
+ */
+-(void)messageHandler:(MPMessageHandler *)handler didUnbindUser:(NSString *)userId;
 /**
  接收消息
  */
@@ -32,15 +35,12 @@ typedef void(^FailureCallBack)(id failureContent);
 
 @end
 
+
 @interface MPMessageHandler : NSObject
 
 + (instancetype)shareMessageHandler;
 
 @property (nonatomic, weak)id<MPMessageHandlerDelegate> delegate;
-
-@property (nonatomic, assign)BOOL isAutoAck;
-@property (nonatomic, assign)BOOL isBizAck;
-
 /**
  获取分配的 主机ip 和 端口号 并建立socket连接
  */
@@ -49,7 +49,7 @@ typedef void(^FailureCallBack)(id failureContent);
 /**
  断开连接
  */
-- (void)disconnect;
+- (void)disconnectSuccess:(SuccessCallBack)success;
 
 /**
  绑定用户id
@@ -66,7 +66,7 @@ typedef void(^FailureCallBack)(id failureContent);
  */
 - (void)sendPushMessageWithContent:(NSDictionary *)contentDic andSuccess:(SuccessCallBack)success andFailure:(FailureCallBack)failure;
 /**
- 是否已连接
+ 是否连接
  */
 - (BOOL)isRunning;
 

@@ -67,7 +67,7 @@
         [SVProgressHUD showWithStatus:@"开始连接"];
         [SVProgressHUD setMaximumDismissTimeInterval:0.5];
         [self.messageHandler connectToHostSuccess:^(id successContent) {
-            FFLog(@"connect success call back");
+            MPLog(@"connect success call back");
             [SVProgressHUD  dismiss];
             [SVProgressHUD showSuccessWithStatus:@"connect success"];
         }];
@@ -77,7 +77,9 @@
 // 断开连接
 - (IBAction)didConnectBtnClick:(id)sender
 {
-    [self.messageHandler disconnect];
+    [self.messageHandler disconnectSuccess:^(id successContent) {
+        MPInLog(@"disconnect success");
+    }];
 }
 
 // 绑定用户
@@ -111,9 +113,9 @@
     contentDict[@"hello"] = self.messageTextField.text;
     
     [self.messageHandler sendPushMessageWithContent:contentDict andSuccess:^(id successContent) {
-        FFInLog(@"send push data success callback");
+        MPInLog(@"send push data success callback");
     } andFailure:^(id failureContent) {
-        FFInLog(@"send push data failure callback");
+        MPInLog(@"send push data failure callback");
     }];
     [self messageTableViewAddMessage:[NSString stringWithFormat:@"发送数据: %@",self.messageTextField.text]];
 }
@@ -168,21 +170,24 @@
 #pragma mark - MPMessageHandlerDelegate
 -(void)messageHandler:(MPMessageHandler *)handler didRecieveMessage:(NSString *)messageString
 {
-    FFInLog(@"message delegate recieve content: %@",messageString);
+    MPInLog(@"message delegate recieve content: %@",messageString);
     [self.messages addObject:[NSString stringWithFormat:@"接收数据: %@",messageString]];
     [self messageTableViewReloadData];
 }
 
 -(void)messageHandler:(MPMessageHandler *)handler didBindUser:(NSString *)userId
 {
-    FFInLog(@"message delegate bind user success: %@",userId);
+    MPInLog(@"message delegate bind user success: %@",userId);
+}
+- (void)messageHandler:(MPMessageHandler *)handler didUnbindUser:(NSString *)userId
+{
+    MPInLog(@"message delegate unbind user success: %@",userId);
 }
 
 - (void)messageHandler:(MPMessageHandler *)handler didKickUserWithUserId:(NSString *)userId andDeviceId:(NSString *)deviceId
 {
-    FFInLog(@"message delegate kick user: %@, deviceId: %@",userId, deviceId);
+    MPInLog(@"message delegate kick user: %@, deviceId: %@",userId, deviceId);
 }
-
 
 
 @end

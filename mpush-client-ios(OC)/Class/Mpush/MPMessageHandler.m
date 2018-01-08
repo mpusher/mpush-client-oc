@@ -43,6 +43,10 @@
 @property (nonatomic, weak)SuccessCallBack sendSuccessCallBack;
 @property (nonatomic, weak)FailureCallBack sendFailureCallBack;
 
+@property (nonatomic, weak)SuccessCallBack disconnectSuccessCallBack;
+
+@property (nonatomic, assign)BOOL isAutoAck;
+@property (nonatomic, assign)BOOL isBizAck;
 
 @end
 
@@ -85,7 +89,7 @@
 - (void)connectToHostSuccess:(SuccessCallBack)success
 {
     self.connectSuccessCallBack = success;
-    FFLog(@"socket start connect");
+    MPLog(@"socket start connect");
     // 获取分配的 主机ip 和 端口号
     [MPAllotClient getHostAddressSuccess:^(NSString *hostAddress) {
         [self processAllocHostDataWithhostAddressStr:hostAddress];
@@ -101,7 +105,7 @@
     uint16_t port = (uint16_t)[hostArr[1] intValue];
     self.host = host;
     self.port = port;
-    FFLog(@"ip and port:%@---%d",host,port);
+    MPLog(@"ip and port:%@---%d",host,port);
     [self networkReachability];
 }
 
@@ -124,21 +128,21 @@
     [manager setReachabilityStatusChangeBlock:^(AFNetworkReachabilityStatus status) {
         switch (status) {
             case AFNetworkReachabilityStatusUnknown:
-                FFLog(@"unrecognized network");
+                MPLog(@"unrecognized network");
                 break;
                 
             case AFNetworkReachabilityStatusNotReachable:
-                FFLog(@"can not connect");
+                MPLog(@"can not connect");
                 [self.socket disconnect];
                 break;
                 
             case AFNetworkReachabilityStatusReachableViaWWAN:
-                FFLog(@"2G,3G,4G... network");
+                MPLog(@"2G,3G,4G... network");
                 [self startConnectSocketWithHostAandPort];
                 break;
                 
             case AFNetworkReachabilityStatusReachableViaWiFi:
-                FFLog(@"wifi  network");
+                MPLog(@"wifi  network");
                 [self startConnectSocketWithHostAandPort];
                 break;
             default:
@@ -153,10 +157,10 @@
 // 连接主机成功
 -(void)socket:(GCDAsyncSocket *)sock didConnectToHost:(NSString *)host port:(uint16_t)port
 {
-    FFLog(@"connect To host");
-    if (![MessageDataPacketTool isFastConnect]) { // 不是快速重连 发送握手包
+    MPLog(@"connect To host");
+    if (![MessageDataPacketTool isFastConnect]) { // 不是快速重连 重新连接
         [self sendMessageDataWithData:[MessageDataPacketTool handshakeMessagePacketData]];
-        FFLog(@"mpush send handshake data");
+        MPLog(@"mpush send handshake data");
         return;
     }
     [self sendMessageDataWithData:[MessageDataPacketTool fastConnect]];
@@ -166,24 +170,21 @@
 -(void)socketDidDisconnect:(GCDAsyncSocket *)sock withError:(NSError *)err
 {
     [self clearHeartBeatTimer];
+    self.disconnectSuccessCallBack(err);
     if(err){
-        FFLog(@"socket disconnect");
-        FFLog(@"%@",err);
         _connectNum ++;
         if (_connectNum < MPMaxConnectTimes) {
             sleep(_connectNum+2);
             NSError *error = nil;
             [_socket connectToHost:self.host onPort:self.port error:&error];
         }
-    } else{
-        FFLog(@"socket disconnect");
     }
 }
 
 // 数据成功发送到服务器
 -(void)socket:(GCDAsyncSocket *)sock didWriteDataWithTag:(long)tag
 {
-    FFLog(@"data write success");
+    MPLog(@"data write success");
     //数据发送成功后，自己调用一下读取数据的方法，接着_socket才会调用下面的代理方法
     [_socket readDataWithTimeout:-1 tag:tag];
 }
@@ -203,7 +204,7 @@
     //心跳
     self.lastReadTime = [[NSDate date] timeIntervalSince1970];
     if (data.length == 1) {
-        FFLog(@"receive heartbeat data");
+        MPLog(@"receive heartbeat data");
         return ;
     }
     
@@ -231,11 +232,11 @@
     
     self.messageBodyData = nil;
     NSData *body_data = [NSData dataWithBytes:packet.body length:packet.length];
-    FFInLog(@"packet cmd:%d",packet.cmd);
+    MPInLog(@"packet cmd:%d",packet.cmd);
     switch (packet.cmd)
     {
         case MpushMessageBodyCMDHandShakeSuccess:
-            FFInLog(@"handshake success");
+            MPInLog(@"handshake success");
             [self processHandShakeDataWithPacket:packet andData:body_data];
             break;
             
@@ -257,9 +258,13 @@
         case MpushMessageBodyCMDOk: //ok
         {
             OK_MESSAGE okMessage = [MessageDataPacketTool okWithBody:body_data];
-            if (okMessage.cmd == MpushMessageBodyCMDOk) {
+            if (okMessage.cmd == MpushMessageBodyCMDBind) {
                 if ([self.delegate respondsToSelector:@selector(messageHandler:didBindUser:)]) {
                     [self.delegate messageHandler:self didBindUser: _userId];
+                }
+            } else if(okMessage.cmd == MpushMessageBodyCMDUnbind){
+                if ([self.delegate respondsToSelector:@selector(messageHandler:didUnbindUser:)]) {
+                    [self.delegate messageHandler:self didUnbindUser: _userId];
                 }
             }
         }
@@ -268,7 +273,7 @@
             
         case MpushMessageBodyCMDHttp: // http代理
         {
-            FFInLog(@"call http proxy successed");
+            MPInLog(@"call http proxy successed");
             NSData *bodyData = [MessageDataPacketTool processFlagWithPacket:packet andBodyData:body_data];
             HTTP_RESPONES_BODY responesBody = [MessageDataPacketTool chatDataSuccessWithData:bodyData];
             
@@ -288,7 +293,7 @@
             break;
             
         case MpushMessageBodyCMDChat: //聊天
-            FFInLog(@"CMDChat");
+            MPInLog(@"CMDChat");
             break;
         case MpushMessageBodyCMDKick: // 被踢下线
             [self processKickUserWithBodyData:body_data];
@@ -304,7 +309,7 @@
     if ([self.delegate respondsToSelector:@selector(messageHandler:didKickUserWithUserId:andDeviceId:)]) {
         [self.delegate messageHandler:self didKickUserWithUserId:[NSString stringWithUTF8String:kickUserMessage.userId] andDeviceId:[NSString stringWithUTF8String:kickUserMessage.deviceId]];
     }
-    FFInLog(@"kick userId: %s",kickUserMessage.userId);
+    MPInLog(@"kick userId: %s",kickUserMessage.userId);
 }
 /**
  增加心跳定时器
@@ -334,7 +339,7 @@
  */
 - (void)sendHeartbeat
 {
-    FFLog(@"heartbeat data send");
+    MPLog(@"heartbeat data send");
     [self healthCheck];
 }
 
@@ -355,7 +360,7 @@
  */
 - (void)processFastConnect
 {
-    FFInLog(@"fastConnect success");
+    MPInLog(@"fastConnect success");
     self.connectSuccessCallBack(@"connect success");
     [self addHeartBeatTimer: MPMinHeartbeat];
 }
@@ -372,14 +377,14 @@
     NSString *contentJsonStr = content[@"content"];
     NSDictionary *contentDict = [self dictionaryWithJsonString:contentJsonStr];
     if (contentDict == nil) {
-        FFInLog(@"json parse data is nil");
+        MPInLog(@"json parse data is nil");
         return;
     }
     NSString *contentStr = contentDict[@"content"];
     if ([self.delegate respondsToSelector:@selector(messageHandler:didRecieveMessage:)]) {
         [self.delegate messageHandler:self didRecieveMessage:contentStr];
     }
-    FFInLog(@"recieve push message: %@", contentStr);
+    MPInLog(@"recieve push message: %@", contentStr);
 }
 
 /*
@@ -439,7 +444,7 @@
     NSString *urlStr = [NSString stringWithFormat:@"%@/push",PUSH_HOST_ADDRESS];
     
     [self sendMessageDataWithData:[MessageDataPacketTool chatDataWithBody:contentDic andUrlStr:urlStr]];
-    FFLog(@"send message data");
+    MPLog(@"send message data");
 }
 
 - (void)sendMessageDataWithData:(NSData *)messageData
@@ -451,8 +456,9 @@
 /**
  断开连接
  */
-- (void)disconnect
+- (void)disconnectSuccess:(SuccessCallBack)success
 {
+    self.disconnectSuccessCallBack = success;
     [self.socket disconnect];
 }
 
@@ -482,7 +488,7 @@
 {
     if ([self isReadTimeout]) {
         self.hbTimeoutTimes+=1;
-        FFLog(@"heartbeat timeout times is: %d", self.hbTimeoutTimes);
+        MPLog(@"heartbeat timeout times is: %d", self.hbTimeoutTimes);
     }else{
         self.hbTimeoutTimes = 0; 
     }

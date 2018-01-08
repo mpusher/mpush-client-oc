@@ -154,17 +154,18 @@
     HAND_SUCCESS_BODY handSuccessBody;
     
     //serverKey的长度
-    handSuccessBody.serverKey = (char *)reader.readBytes;
+    int8_t *rr = (int8_t *)[reader.readData bytes];
+    for (int i = 0; i < 16 ; i ++) {
+        handSuccessBody.serverKey[i] = rr[i];
+    }
     handSuccessBody.heartbeat = reader.readInt32;
-    handSuccessBody.sessionId = (char *)reader.readBytes;
+//    MPLog(@"reader.readString: %@", reader.readString.UTF8String);
+    handSuccessBody.sessionId = (char *)reader.readString.UTF8String;
     handSuccessBody.expireTime = reader.readInt64;
     
     NSData *sessionKeyData = [MPCipherBox mixAesKey:handSuccessBody.serverKey];
-    
     [MPCipherBox setSessionData:sessionKeyData];
-    [MPUserDefaults setObject:[NSString stringWithUTF8String:handSuccessBody.sessionId] forKey:MPSessionId];
-    [MPUserDefaults setDouble:handSuccessBody.expireTime/1000.0 forKey:MPExpireTime];
-    [MPUserDefaults synchronize];
+    [MPSessionStorage saveSessionWithSessionId:[NSString stringWithUTF8String:handSuccessBody.sessionId] andExpireTime:handSuccessBody.expireTime/1000.0];
     return handSuccessBody;
 }
 
@@ -312,15 +313,15 @@
     RFIReader *reader = [RFIReader readerWithData:bodyData];
     
     httpResponesBody.statusCode = reader.readInt32;
-    FFInLog(@"statusCode: %d", httpResponesBody.statusCode);
+    MPInLog(@"statusCode: %d", httpResponesBody.statusCode);
     
     httpResponesBody.reasonPhrase = (char *)reader.readBytes;
-    FFInLog(@"reasonPhraseStr: %s", httpResponesBody.reasonPhrase);
+    MPInLog(@"reasonPhraseStr: %s", httpResponesBody.reasonPhrase);
     
     httpResponesBody.headers = (char *)reader.readBytes;
     
     httpResponesBody.body = (char *)reader.readBytes;
-    FFInLog(@"push content:%s",httpResponesBody.body);
+    MPInLog(@"push content:%s",httpResponesBody.body);
     return httpResponesBody;
 }
 
@@ -337,7 +338,7 @@
 + (NSData *)fastConnect
 {
     NSString *deviceId = [MPUserDefaults objectForKey:MPDeviceId];
-    NSString *sessionId = [MPUserDefaults objectForKey:MPSessionId];
+    NSString *sessionId = [MPSessionStorage getSessionStorage][MPSessionId];
     int32_t minHeartbeat = MPMinHeartbeat;
     int32_t maxHeartbeat = MPMaxHeartbeat;
 
@@ -408,13 +409,13 @@
     ERROR_MESSAGE errorMessage;
     RFIReader *reader = [RFIReader readerWithData:body];
     errorMessage.cmd = reader.readByte;
-    FFInLog(@"error cmdL: %d",errorMessage.cmd);
+    MPInLog(@"error cmdL: %d",errorMessage.cmd);
     
     errorMessage.code = reader.readByte;
-    FFInLog(@"error code: %d",errorMessage.code);
+    MPInLog(@"error code: %d",errorMessage.code);
     
     errorMessage.reason = (char *)reader.readBytes;
-    FFInLog(@"error reason: %s",errorMessage.reason);
+    MPInLog(@"error reason: %s",errorMessage.reason);
     return errorMessage;
 }
 
@@ -431,13 +432,13 @@
     RFIReader *reader = [RFIReader readerWithData: body];
     
     okMessage.cmd = reader.readByte;
-    FFInLog(@"ok cmd: %d",okMessage.cmd);
+    MPInLog(@"ok cmd: %d",okMessage.cmd);
     
     okMessage.code = reader.readByte;
-    FFInLog(@"ok code: %d",okMessage.code);
+    MPInLog(@"ok code: %d",okMessage.code);
     
     okMessage.reason = (char *)reader.readBytes;
-    FFInLog(@"ok reason: %s",okMessage.reason);
+    MPInLog(@"ok reason: %s",okMessage.reason);
     return okMessage;
 }
 
@@ -453,23 +454,25 @@
     KICK_USER_MESSAGE kickUserMessage;
     RFIReader *reader = [RFIReader readerWithData:body];
     kickUserMessage.deviceId = (char *)reader.readBytes;
-    FFInLog(@"deviceId kick: %s",kickUserMessage.deviceId);
+    MPInLog(@"deviceId kick: %s",kickUserMessage.deviceId);
     
     kickUserMessage.userId = (char *)reader.readBytes;
-    FFInLog(@"userId kick: %s",kickUserMessage.userId);
+    MPInLog(@"userId kick: %s",kickUserMessage.userId);
     return kickUserMessage;
 }
 
 + (BOOL)isFastConnect
 {
-    NSString *sessionId = [MPUserDefaults objectForKey:MPSessionId];
+    NSDictionary *ssDict = [MPSessionStorage getSessionStorage];
+    NSString *sessionId = ssDict[MPSessionId];
     // 过期时间
-    double expireTime = [MPUserDefaults doubleForKey:MPExpireTime];
+    double expireTime = [ssDict[MPExpireTime] doubleValue];
     // 当前时间
     NSTimeInterval date = [[NSDate date] timeIntervalSince1970];
     
     // 发送握手数据
     if (!sessionId || expireTime < date) {
+        [MPSessionStorage clearSession];
         return NO;
     } else{
         return YES;

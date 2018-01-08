@@ -12,6 +12,7 @@
 #import "RFIWriter.h"
 #import "Mpush.h"
 #import "LFCGzipUtility.h"
+#import "MPSessionStorage.h"
 
 
 typedef struct _iphdr
@@ -20,7 +21,7 @@ typedef struct _iphdr
     int8_t cmd;             //协议消息类型
     short cc;               //根据body生成的校验码
     int8_t flags;           //当前包使用的一些特性
-    int sessionId;          //消息会话标示用于消息响应
+    int32_t sessionId;          //消息会话标示用于消息响应
     int8_t lrc;             //用于校验header
     char *body;
     
@@ -44,7 +45,7 @@ typedef struct _ipbody
  */
 typedef struct _handSuccessBody
 {
-    char *serverKey;   //服务段返回的key 用于aes加密的
+    int8_t serverKey[MPAeslength];   //服务段返回的key 用于aes加密的
     int heartbeat;          //消息会话标示用于消息响应
     char *sessionId;        //会话id
     long expireTime;        //失效时间
