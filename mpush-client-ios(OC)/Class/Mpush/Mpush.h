@@ -11,6 +11,7 @@
 
 
 #define PUSH_HOST_ADDRESS @"http://103.60.220.145:9999"
+#define HOST_ADDRESS_KEY @"HOST_ADDRESS_KEY"
 
 #define DEVICE_TYPE @"ios"
 #define appVersion @"9.2.1"
@@ -41,6 +42,7 @@
 #define MPInLog(fmt, ...) NSLog((@"[Line-%d] %s <<<<<<" fmt), __LINE__, __PRETTY_FUNCTION__,  ##__VA_ARGS__)
 #else  //Release模式下
 #define MPLog(...)
+#define MPInLog(...)
 #endif
 
 

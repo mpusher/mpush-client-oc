@@ -49,6 +49,8 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
+    self.allocerTextField.text = PUSH_HOST_ADDRESS;
+    self.allocerTextField.enabled = false;
     
     MPMessageHandler *messageHandler = [MPMessageHandler shareMessageHandler];
     messageHandler.delegate = self;

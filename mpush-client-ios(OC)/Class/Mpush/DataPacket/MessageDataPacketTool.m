@@ -464,6 +464,7 @@
 + (BOOL)isFastConnect
 {
     NSDictionary *ssDict = [MPSessionStorage getSessionStorage];
+    NSString *hostAddress = ssDict[HOST_ADDRESS_KEY];
     NSString *sessionId = ssDict[MPSessionId];
     // 过期时间
     double expireTime = [ssDict[MPExpireTime] doubleValue];
@@ -471,7 +472,7 @@
     NSTimeInterval date = [[NSDate date] timeIntervalSince1970];
     
     // 发送握手数据
-    if (!sessionId || expireTime < date) {
+    if (!sessionId || expireTime < date || ![hostAddress isEqualToString:PUSH_HOST_ADDRESS]) {
         [MPSessionStorage clearSession];
         return NO;
     } else{

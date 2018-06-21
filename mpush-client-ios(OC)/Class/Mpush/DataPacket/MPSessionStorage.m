@@ -18,6 +18,7 @@
 {
     [MPUserDefaults setObject:sessionId forKey:MPSessionId];
     [MPUserDefaults setDouble:expireTime forKey:MPExpireTime];
+    [MPUserDefaults setObject:PUSH_HOST_ADDRESS forKey:HOST_ADDRESS_KEY];
     [MPUserDefaults synchronize];
 }
 
@@ -26,14 +27,17 @@
     NSMutableDictionary *dictionary = [NSMutableDictionary dictionary];
     double expireTime = [MPUserDefaults doubleForKey:MPExpireTime];
     NSString *sessionId = [MPUserDefaults objectForKey:MPSessionId];
+    NSString *pushHostAddress = [MPUserDefaults objectForKey:HOST_ADDRESS_KEY];
     dictionary[MPSessionId] = sessionId;
     dictionary[MPExpireTime] = @(expireTime);
+    dictionary[HOST_ADDRESS_KEY] = pushHostAddress;
     return dictionary;
 }
 
 + (void)clearSession
 {
     [MPUserDefaults removeObjectForKey:MPSessionId];
+    [MPUserDefaults removeObjectForKey:HOST_ADDRESS_KEY];
     [MPUserDefaults setDouble:0.0 forKey: MPExpireTime];
     [MPUserDefaults synchronize];
 }

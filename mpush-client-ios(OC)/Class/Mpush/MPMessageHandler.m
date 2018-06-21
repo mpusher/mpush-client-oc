@@ -161,9 +161,10 @@
     if (![MessageDataPacketTool isFastConnect]) { // 不是快速重连 重新连接
         [self sendMessageDataWithData:[MessageDataPacketTool handshakeMessagePacketData]];
         MPLog(@"mpush send handshake data");
-        return;
+    }else{
+        [self sendMessageDataWithData:[MessageDataPacketTool fastConnect]];
+        MPLog(@"mpush send fastConnect data");
     }
-    [self sendMessageDataWithData:[MessageDataPacketTool fastConnect]];
 }
 
 // 与主机断开连接
