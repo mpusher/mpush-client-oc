@@ -30,4 +30,6 @@
 - (void)writeString:(NSString*)str;
 - (void)writeFloat:(float)value;
 - (void)writeDouble:(double)value;
+- (void)writeData:(NSData*)data;
+
 @end

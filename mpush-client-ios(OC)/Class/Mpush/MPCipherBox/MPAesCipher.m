@@ -8,7 +8,7 @@
 
 #import "MPAesCipher.h"
 #import <CommonCrypto/CommonCryptor.h>
-#import "MPAesCipher.h"
+#import "MPCipherBox.h"
 
 @implementation MPAesCipher
 
@@ -44,6 +44,10 @@
     }
     free(encryptBuffer); //free the buffer;
     return encryptData;
+}
+
++ (NSData *) aesEncriptData:(NSData *)enData{
+    return [self aesEncriptData:enData WithIv:[MPCipherBox getIvBytes] andKey:[MPCipherBox getSessionBytes]];
 }
 
 /**
@@ -82,4 +86,7 @@
     
     return newSrcData;
 }
+
+
+
 @end

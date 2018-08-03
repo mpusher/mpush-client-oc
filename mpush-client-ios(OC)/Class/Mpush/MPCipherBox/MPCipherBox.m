@@ -8,31 +8,35 @@
 
 #import "MPCipherBox.h"
 #import "Mpush.h"
+#import "MPConfig.h"
 
 @implementation MPCipherBox
 
-+(NSData *)mixAesKey:(char *)serverKey {
-    static int8_t sessionKey[MPAeslength] ;
++(NSData *)mixAesKey:(NSData *)serverKey {
+    int aesKeyLength = [MPConfig defaultConfig].aesKeyLength;
+    static int8_t sessionKey[16] ;
+    int8_t *serverKeyBytes = (int8_t *)serverKey.bytes;
+    
     NSData *clientKeyData = [MPUserDefaults objectForKey:MPClientKeyData];
     int8_t *clientKeyBytes = (int8_t *)[clientKeyData bytes];
-    for (int i = 0; i < MPAeslength; i++) {
+    for (int i = 0; i < aesKeyLength; i++) {
         int8_t a = clientKeyBytes[i];
-        int8_t b = serverKey[i];
+        int8_t b = serverKeyBytes[i];
         int sum = abs(a+b);
         int c = (sum % 2 == 0) ? a^b : b^a ;
         sessionKey[i] = (int8_t)c;
     }
-    NSData *sessionKeyData = [NSData dataWithBytes:sessionKey length:MPAeslength];
+    NSData *sessionKeyData = [NSData dataWithBytes:sessionKey length:aesKeyLength];
     return sessionKeyData;
 }
 
-+ (NSData *)generateRandomAesKeyWithLength:(int)aesIvLength
++ (NSData *)generateRandomAesKeyWithLength:(int8_t)aesIvLength
 {
-    char iv[aesIvLength];
+    int8_t iv[aesIvLength];
     for (int i = 0; i < aesIvLength; i++) {
         iv[i] = arc4random() % aesIvLength;
     }
-    NSData *ivData = [[NSData alloc] initWithBytes:iv length:MPAeslength];
+    NSData *ivData = [[NSData alloc] initWithBytes:iv length:[MPConfig defaultConfig].aesKeyLength];
     return ivData;
 }
 
@@ -61,6 +65,21 @@
     int8_t *clientKeyBytes = (int8_t *)[clientKeyData bytes];
     return clientKeyBytes;
 }
+
+
++ (NSData *)getIvData
+{
+    NSData *ivData = [MPUserDefaults objectForKey:MPIvData];
+    
+    return ivData;
+}
+
++ (NSData *)getClientKeyData
+{
+    NSData *clientKeyData = [MPUserDefaults objectForKey:MPClientKeyData];
+    return clientKeyData;
+}
+
 
 + (void)setSessionData:(NSData *)keyData
 {

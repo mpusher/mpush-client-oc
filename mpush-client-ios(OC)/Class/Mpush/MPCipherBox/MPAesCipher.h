@@ -21,6 +21,7 @@
  */
 + (NSData *) aesEncriptData:(NSData *)enData WithIv:(int8_t [])iv andKey:(int8_t [])key;
 
++ (NSData *) aesEncriptData:(NSData *)enData;
 /**
  *  aes解密方法
  *

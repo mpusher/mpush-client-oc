@@ -7,13 +7,12 @@
 //
 
 #import "ViewController.h"
-#import "MPMessageHandler.h"
-#import "SVProgressHUD.h"
+#import "MPClient.h"
 
 
 
 
-@interface ViewController ()<UITextFieldDelegate,UITableViewDelegate,UITableViewDataSource,MPMessageHandlerDelegate>
+@interface ViewController ()<UITextFieldDelegate,UITableViewDelegate,UITableViewDataSource, MPClientDelegate>
 
 @property (weak, nonatomic) IBOutlet UITextField *messageTextField;
 
@@ -24,7 +23,8 @@
 
 /** 绑定的用户id  */
 @property(nonatomic,copy)NSString *userId;
-@property (nonatomic, strong)MPMessageHandler *messageHandler;
+//@property (nonatomic, strong)MPMessageHandler *messageHandler;
+@property (nonatomic, strong)MPClient *mpClient;
 
 @property (weak, nonatomic) IBOutlet UITextField *allocerTextField;
 @property (weak, nonatomic) IBOutlet UITextField *userFromTextField;
@@ -49,39 +49,71 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    self.allocerTextField.text = PUSH_HOST_ADDRESS;
+    self.allocerTextField.text = [MPConfig defaultConfig].allotServer;
     self.allocerTextField.enabled = false;
     
-    MPMessageHandler *messageHandler = [MPMessageHandler shareMessageHandler];
-    messageHandler.delegate = self;
-    self.messageHandler = messageHandler;
+//    MPMessageHandler *messageHandler = [MPMessageHandler shareMessageHandler];
+//    messageHandler.delegate = self;
+//    self.messageHandler = messageHandler;
+    
+    MPClient *client = [MPClient sharedClient];
+    client.delegate = self;
+    self.mpClient = client;
     
     self.messageTableView.dataSource = self;
     self.messageTableView.delegate = self;
     self.messageTextField.delegate = self;
+    \
 }
 
 #pragma mark - 连接流程操作
 // 建立连接
+//- (IBAction)connectBtnClick:(id)sender
+//{
+//    if (!self.messageHandler.isRunning) {
+//        [self.messageHandler connectToHostSuccess:^(id successContent) {
+//            MPLog(@"connect success call back");
+//        }];
+//    }
+//}
+//
+//// 断开连接
+//- (IBAction)didConnectBtnClick:(id)sender
+//{
+//    [self.messageHandler disconnectSuccess:^(id successContent) {
+//        MPInLog(@"disconnect success");
+//    }];
+//}
+//
+//// 绑定用户
+//- (IBAction)bindBtnClick:(id)sender
+//{
+//    NSString *userId = self.userFromTextField.text;
+//    if (!userId || [userId isEqualToString:@""]) {
+//        return;
+//    }
+//    self.userId = userId;
+//    [self.messageHandler bindUserWithUserId: self.userId];
+//}
+//// 解绑用户
+//- (IBAction)unbindBtnClick:(id)sender
+//{
+//    [self.messageHandler unbindUserWithUserId:self.userId];
+//    self.userId = nil;
+//}
+
+// 建立连接
 - (IBAction)connectBtnClick:(id)sender
 {
-    if (!self.messageHandler.isRunning) {
-        [SVProgressHUD showWithStatus:@"开始连接"];
-        [SVProgressHUD setMaximumDismissTimeInterval:0.5];
-        [self.messageHandler connectToHostSuccess:^(id successContent) {
-            MPLog(@"connect success call back");
-            [SVProgressHUD  dismiss];
-            [SVProgressHUD showSuccessWithStatus:@"connect success"];
-        }];
+    if (!self.mpClient.isRunning) {
+        [self.mpClient connectToHost];
     }
 }
 
 // 断开连接
 - (IBAction)didConnectBtnClick:(id)sender
 {
-    [self.messageHandler disconnectSuccess:^(id successContent) {
-        MPInLog(@"disconnect success");
-    }];
+    [self.mpClient disconnect];
 }
 
 // 绑定用户
@@ -92,14 +124,15 @@
         return;
     }
     self.userId = userId;
-    [self.messageHandler bindUserWithUserId: self.userId];
+    [self.mpClient bindUserWithUserId: self.userId];
 }
 // 解绑用户
 - (IBAction)unbindBtnClick:(id)sender
 {
-    [self.messageHandler unbindUserWithUserId:self.userId];
+    [self.mpClient unbindUserWithUserId:self.userId];
     self.userId = nil;
 }
+
 
 // 发送消息按钮点击
 - (IBAction)senfBtnClick:(id)sender
@@ -114,11 +147,8 @@
     contentDict[@"userId"] = self.userToTextField.text;
     contentDict[@"hello"] = self.messageTextField.text;
     
-    [self.messageHandler sendPushMessageWithContent:contentDict andSuccess:^(id successContent) {
-        MPInLog(@"send push data success callback");
-    } andFailure:^(id failureContent) {
-        MPInLog(@"send push data failure callback");
-    }];
+    [self.mpClient sendPushMessageWithContent:contentDict];
+    
     [self messageTableViewAddMessage:[NSString stringWithFormat:@"发送数据: %@",self.messageTextField.text]];
 }
 
@@ -169,28 +199,28 @@
     return cell;
 }
 
-#pragma mark - MPMessageHandlerDelegate
--(void)messageHandler:(MPMessageHandler *)handler didRecieveMessage:(NSString *)messageString
-{
-    MPInLog(@"message delegate recieve content: %@",messageString);
-    [self.messages addObject:[NSString stringWithFormat:@"接收数据: %@",messageString]];
-    [self messageTableViewReloadData];
+#pragma mark - MPClientDelegate
+-(void)client:(MPClient *)client onConnectedSock:(GCDAsyncSocket *)sock{
+    MPLog(@"MPClientDelegate onConnectedSock");
+}
+- (void)client:(MPClient *)client onDisConnectedSock:(GCDAsyncSocket *)sock{
+    MPLog(@"MPClientDelegate onDisConnectedSock");
+}
+- (void)client:(MPClient *)client onHandshakeOk:(int32_t)heartbeat{
+    MPLog(@"MPClientDelegate heartbeat: %d", heartbeat);
 }
 
--(void)messageHandler:(MPMessageHandler *)handler didBindUser:(NSString *)userId
-{
-    MPInLog(@"message delegate bind user success: %@",userId);
+- (void)client:(MPClient *)client onRecieveOkMsg:(MPOkMessage *)okMsg{
+    MPLog(@"MPClientDelegate onRecieveOkMsg: %@",[okMsg debugDescription]);
 }
-- (void)messageHandler:(MPMessageHandler *)handler didUnbindUser:(NSString *)userId
-{
-    MPInLog(@"message delegate unbind user success: %@",userId);
+- (void)client:(MPClient *)client onRecieveErrorMsg:(MPErrorMessage *)errorMsg{
+    MPLog(@"MPClientDelegate onRecieveErrorMsg: %@",[errorMsg debugDescription]);
 }
 
-- (void)messageHandler:(MPMessageHandler *)handler didKickUserWithUserId:(NSString *)userId andDeviceId:(NSString *)deviceId
-{
-    MPInLog(@"message delegate kick user: %@, deviceId: %@",userId, deviceId);
+- (void)client:(MPClient *)client onRecievePushMsg:(MPPushMessage *)pushMessage{
+    
+    MPLog(@"[NSThread currentThread: %@] onRecievePushMsg pushMessage: %@",[NSThread currentThread] ,[pushMessage debugDescription]);
 }
-
 
 @end
 

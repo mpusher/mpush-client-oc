@@ -25,6 +25,12 @@
     return self;
 }
 
+- (void)writeData:(NSData*)data
+{
+    [self writeInt16: data.length];
+    if(data.length) [_data appendData:data];
+}
+
 - (void)writeBytes:(NSData*)bytes
 {
     if(bytes.length) [_data appendData:bytes];

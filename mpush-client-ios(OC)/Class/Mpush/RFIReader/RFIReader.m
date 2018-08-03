@@ -29,6 +29,7 @@
 - (NSData*)readData:(uint32_t)len
 {
     if(!len) return nil;
+    
     NSData *data = [_data subdataWithRange:NSMakeRange(_poz, len)];
     _poz += len;
     return data;
@@ -50,42 +51,42 @@
 {
     char *ptr = _pointer + _poz;
     _poz += sizeof(int16_t);
-    return HTONS(*(int16_t*)ptr);
+    return NTOHS(*(int16_t*)ptr);
 }
 
 - (int32_t)readInt32
 {
     char *ptr = _pointer + _poz;
     _poz += sizeof(int32_t);
-    return HTONL(*(int32_t*)ptr);
+    return NTOHL(*(int32_t*)ptr);
 }
 
 - (int64_t)readInt64
 {
     char *ptr = _pointer + _poz;
     _poz += sizeof(int64_t);
-    return HTONLL(*(int64_t*)ptr);
+    return NTOHLL(*(int64_t*)ptr);
 }
 
 - (uint16_t)readUInt16
 {
     char *ptr = _pointer + _poz;
     _poz += sizeof(uint16_t);
-    return HTONS(*(uint16_t*)ptr);
+    return NTOHS(*(uint16_t*)ptr);
 }
 
 - (uint32_t)readUInt32
 {
     char *ptr = _pointer + _poz;
     _poz += sizeof(uint32_t);
-    return HTONL(*(uint32_t*)ptr);
+    return NTOHL(*(uint32_t*)ptr);
 }
 
 - (uint64_t)readUInt64
 {
     char *ptr = _pointer + _poz;
     _poz += sizeof(uint64_t);
-    return HTONLL(*(uint64_t*)ptr);
+    return NTOHLL(*(uint64_t*)ptr);
 }
 
 - (char)readByte
@@ -106,20 +107,21 @@
 {
     char *ptr = _pointer + _poz;
     _poz += sizeof(float);
-    return HTONLL(*(float*)ptr);
+    return NTOHLL(*(float*)ptr);
 }
 
 - (double)readDouble
 {
     char *ptr = _pointer + _poz;
     _poz += sizeof(double);
-    return HTONLL(*(double*)ptr);
+    return NTOHLL(*(double*)ptr);
 }
 
 - (NSString*)readString
 {
     NSData *data = [self readData];
-    if(data) return [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
+    if(data)
+        return [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
     return nil;
 }
 
