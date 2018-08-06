@@ -554,7 +554,7 @@
 						DevelopmentTeam = 9LW6A56WFN;
 						SystemCapabilities = {
 							com.apple.Keychain = {
-								enabled = 1;
+								enabled = 0;
 							};
 						};
 					};
@@ -812,7 +812,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_ENTITLEMENTS = "mpush-client-ios(OC)/mpush-client-ios(OC).entitlements";
 				DEVELOPMENT_TEAM = 9LW6A56WFN;
 				INFOPLIST_FILE = "mpush-client-ios(OC)/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
@@ -825,7 +824,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_ENTITLEMENTS = "mpush-client-ios(OC)/mpush-client-ios(OC).entitlements";
 				DEVELOPMENT_TEAM = 9LW6A56WFN;
 				INFOPLIST_FILE = "mpush-client-ios(OC)/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
