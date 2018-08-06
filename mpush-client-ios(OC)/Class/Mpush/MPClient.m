@@ -249,7 +249,7 @@
     }else {
         self.hbTimeoutTimes = 0;
     }
-    MPLog(@"heartbeat timeout times is: %d", self.hbTimeoutTimes);
+//    MPLog(@"heartbeat timeout times is: %d", self.hbTimeoutTimes);
     
     if (self.hbTimeoutTimes > MPMaxHBTimeOutTimes) {
         [self startConnect];

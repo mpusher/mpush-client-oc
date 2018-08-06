@@ -57,12 +57,8 @@
     self.timestamp = time;
     [writer writeInt64:time];
     
-    // rsa加密
-    NSData *encryptBody = [RSA encryptData:writer.data publicKey: [MPConfig defaultConfig].publicKey];
-    MPPacket *packet = self.packet;
-    [packet addFlag:(MPFlagsCrypto)];
-    packet.body = encryptBody;
-    return [MPPacketEncoder encodePacket:packet];
+    self.packet.body = writer.data;
+    return [super encode];
 }
 
 @end

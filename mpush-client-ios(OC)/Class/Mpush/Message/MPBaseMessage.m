@@ -12,6 +12,7 @@
 #import "MPAesCipher.h"
 #import "LFCGzipUtility.h"
 #import <stdatomic.h>
+#import "RSA.h"
 
 @interface MPBaseMessage()
 
@@ -69,11 +70,18 @@
         }
         
         // 2、加密
-        NSData *result = [MPAesCipher aesEncriptData:body];
-        if (result.length > 0) {
-            body = result;
-            [self.packet addFlag: MPFlagsCrypto];
+        if (self.packet.cmd == MPCmdHandShake || self.packet.cmd == MPCmdFastConnect) {
+            NSData *encryptBody = [RSA encryptData:body publicKey: [MPConfig defaultConfig].publicKey];
+            body = encryptBody;
+            [self.packet addFlag:(MPFlagsCrypto)];
+        } else {
+            NSData *result = [MPAesCipher aesEncriptData:body];
+            if (result.length > 0) {
+                body = result;
+                [self.packet addFlag: MPFlagsCrypto];
+            }
         }
+        
         self.packet.body = body;
         return [MPPacketEncoder encodePacket:self.packet];
     }

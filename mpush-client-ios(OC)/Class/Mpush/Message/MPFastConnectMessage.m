@@ -27,12 +27,8 @@
     [writer writeInt32:[MPConfig defaultConfig].minHeartbeat];
     [writer writeInt32:[MPConfig defaultConfig].maxHeartbeat];
     
-    // rsa加密
-    NSData *encryptBody = [RSA encryptData:writer.data publicKey: [MPConfig defaultConfig].publicKey];
-    MPPacket *packet = self.packet;
-    [packet addFlag:(MPFlagsCrypto)];
-    packet.body = encryptBody;
-    return [MPPacketEncoder encodePacket:packet];
+    self.packet.body = writer.data;
+    return [MPPacketEncoder encodePacket:self.packet];
 }
 
 @end
