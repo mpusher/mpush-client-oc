@@ -8,6 +8,10 @@
 
 #import <Foundation/Foundation.h>
 
+#define MPIvData @"MPIvData"
+#define MPClientKeyData @"MPClientKeyData"
+#define  MPSessionKeyData @"MPSessionKeyData"
+
 @interface MPCipherBox : NSObject
 
 + (NSData *)mixAesKey:(NSData *)serverKey;

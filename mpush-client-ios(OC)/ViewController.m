@@ -34,6 +34,7 @@
 @property (weak, nonatomic) IBOutlet UIButton *unBindButton;
 @property (weak, nonatomic) IBOutlet UIButton *sendButton;
 
+@property (nonatomic, assign)int messageCount;
 
 @end
 
@@ -52,10 +53,6 @@
     self.allocerTextField.text = [MPConfig defaultConfig].allotServer;
     self.allocerTextField.enabled = false;
     
-//    MPMessageHandler *messageHandler = [MPMessageHandler shareMessageHandler];
-//    messageHandler.delegate = self;
-//    self.messageHandler = messageHandler;
-    
     MPClient *client = [MPClient sharedClient];
     client.delegate = self;
     self.mpClient = client;
@@ -63,45 +60,9 @@
     self.messageTableView.dataSource = self;
     self.messageTableView.delegate = self;
     self.messageTextField.delegate = self;
-    \
 }
 
-#pragma mark - 连接流程操作
-// 建立连接
-//- (IBAction)connectBtnClick:(id)sender
-//{
-//    if (!self.messageHandler.isRunning) {
-//        [self.messageHandler connectToHostSuccess:^(id successContent) {
-//            MPLog(@"connect success call back");
-//        }];
-//    }
-//}
-//
-//// 断开连接
-//- (IBAction)didConnectBtnClick:(id)sender
-//{
-//    [self.messageHandler disconnectSuccess:^(id successContent) {
-//        MPInLog(@"disconnect success");
-//    }];
-//}
-//
-//// 绑定用户
-//- (IBAction)bindBtnClick:(id)sender
-//{
-//    NSString *userId = self.userFromTextField.text;
-//    if (!userId || [userId isEqualToString:@""]) {
-//        return;
-//    }
-//    self.userId = userId;
-//    [self.messageHandler bindUserWithUserId: self.userId];
-//}
-//// 解绑用户
-//- (IBAction)unbindBtnClick:(id)sender
-//{
-//    [self.messageHandler unbindUserWithUserId:self.userId];
-//    self.userId = nil;
-//}
-
+#pragma mark - 操作
 // 建立连接
 - (IBAction)connectBtnClick:(id)sender
 {
@@ -132,7 +93,6 @@
     [self.mpClient unbindUserWithUserId:self.userId];
     self.userId = nil;
 }
-
 
 // 发送消息按钮点击
 - (IBAction)senfBtnClick:(id)sender
@@ -218,8 +178,10 @@
 }
 
 - (void)client:(MPClient *)client onRecievePushMsg:(MPPushMessage *)pushMessage{
-    
     MPLog(@"[NSThread currentThread: %@] onRecievePushMsg pushMessage: %@",[NSThread currentThread] ,[pushMessage debugDescription]);
+    self.messageCount++;
+    MPLog(@"onRecievePushMsg: %d",self.messageCount);
+    
 }
 
 @end

@@ -18,17 +18,18 @@
 
 - (void)handleWithMessage:(MPPushMessage *)message{
     MPClient *client = [MPClient sharedClient];
+    if ([message autoAck]) {
+        dispatch_async(dispatch_get_global_queue(0, 0), ^{
+            MPAckMessage *ackMessage = [[MPAckMessage alloc] initWithSessionId:message.getSessionId];
+            MPLog(@"message.getSessionId: %d", message.getSessionId);
+            NSData *data = [ackMessage encode];
+            [client sendMessageData:data];
+        });
+    }
     if ([client.delegate respondsToSelector: @selector(client:onRecievePushMsg:)]) {
         [client.delegate client:client onRecievePushMsg:message];
     }
-    if (message.autoAck) {
-        MPAckMessage *ackMessage = [[MPAckMessage alloc] initWithSessionId:message.getSessionId];
-        [client sendMessageData:[ackMessage encode]];
-    }
 }
 
-//- (void)handleWithPacket:(MPPacket *)packet{
-//    MPLog(@"receive MPPushMessageHandler");
-//}
 
 @end

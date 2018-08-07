@@ -19,5 +19,6 @@
 @interface MPBaseMessageHandle : NSObject
 - (MPBaseMessage *)decodeWithPacket:(MPPacket *)packet;
 - (void)handleWithMessage:(MPBaseMessage *)message;
+
 - (void)handleWithPacket:(MPPacket *)packet;
 @end

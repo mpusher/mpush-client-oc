@@ -8,6 +8,11 @@
 
 #import <Foundation/Foundation.h>
 
+#define  MPSessionId @"MPSessionId"
+#define  MPExpireTime @"MPExpireTime"
+#define MPDeviceId @"MPIdentifierForVendor"
+#define HOST_ADDRESS_KEY @"HOST_ADDRESS_KEY"
+
 @interface MPSessionStorage : NSObject
 
 

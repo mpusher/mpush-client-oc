@@ -10,7 +10,7 @@
 
 @interface MPPushMessage : MPBaseMessage
 @property (nonatomic, strong)NSData *content;
-//@property (nonatomic, strong) NSDictionary *contentDict;
+@property (nonatomic, strong) NSDictionary *contentDict;
 - (BOOL)autoAck;
 - (BOOL)bizAck;
 @end

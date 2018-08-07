@@ -9,6 +9,7 @@
 #import "MPAllotClient.h"
 #import "Mpush.h"
 #import "AFNetworking.h"
+#import "MPConfig.h"
 
 @implementation MPAllotClient
 
@@ -18,7 +19,7 @@
 + (void)getHostAddressSuccess:(SuccessGetHost)success andFailure:(FailureGetHost)failure
 {
     // 获取分配的 主机ip 和 端口号
-    NSString *urlStr = PUSH_HOST_ADDRESS;
+    NSString *urlStr = [MPConfig defaultConfig].allotServer;
     AFHTTPSessionManager *mng = [AFHTTPSessionManager manager];
     mng.responseSerializer.acceptableContentTypes = [NSSet setWithObjects:@"application/json",@"text/plain",@"text/html",nil];
     [mng.requestSerializer setValue:@"text/html; charset=utf-8" forHTTPHeaderField:@"Content-Type"];

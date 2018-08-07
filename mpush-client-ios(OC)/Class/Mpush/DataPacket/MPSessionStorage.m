@@ -9,6 +9,7 @@
 #import "MPSessionStorage.h"
 #import "Mpush.h"
 #import <stdatomic.h>
+#import "MPConfig.h"
 
 
 
@@ -18,7 +19,7 @@
 {
     [MPUserDefaults setObject:sessionId forKey:MPSessionId];
     [MPUserDefaults setDouble:expireTime forKey:MPExpireTime];
-    [MPUserDefaults setObject:PUSH_HOST_ADDRESS forKey:HOST_ADDRESS_KEY];
+    [MPUserDefaults setObject:[MPConfig defaultConfig].allotServer forKey:HOST_ADDRESS_KEY];
     [MPUserDefaults synchronize];
 }
 

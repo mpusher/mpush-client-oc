@@ -12,7 +12,7 @@
 - (void)decodeWithBody:(NSData *)body{
     self.content = body;
     
-//    self.contentDict = [NSJSONSerialization JSONObjectWithData:body options:NSJSONReadingMutableContainers error:nil];
+    self.contentDict = [NSJSONSerialization JSONObjectWithData:body options:NSJSONReadingMutableContainers error:nil];
 }
 
 - (BOOL)autoAck{

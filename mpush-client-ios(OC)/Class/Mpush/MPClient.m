@@ -81,8 +81,9 @@
     NSArray *hostArr = [hostAddress componentsSeparatedByString:@":"];
     NSString *host = hostArr[0];
     uint16_t port = (uint16_t)[hostArr[1] intValue];
-    self.host = host;
-    self.port = port;
+    MPConfig *config = [MPConfig defaultConfig];
+    config.serverHost = host;
+    config.serverPort = port;
     MPLog(@"ip and port:%@---%d",host,port);
     [self networkReachability];
 }
@@ -127,7 +128,9 @@
     // 连接
     NSError *error = nil;
     [self disconnect];
-    [_socket connectToHost:self.host onPort:self.port error:&error];
+    
+    MPConfig *config = [MPConfig defaultConfig];
+    [_socket connectToHost:config.serverHost onPort:config.serverPort error:&error];
 }
 
 #pragma mark -GCDAsyncSocketDelegate
@@ -162,10 +165,11 @@
     }
     if(err){
         self.connectNum ++;
-        if (_connectNum < MPMaxConnectTimes) {
+        if (_connectNum < [MPConfig defaultConfig].maxConnectTimes) {
             sleep(_connectNum+2);
             NSError *error = nil;
-            [_socket connectToHost:self.host onPort:self.port error:&error];
+            MPConfig *config = [MPConfig defaultConfig];
+            [_socket connectToHost:config.serverHost onPort:config.serverPort error:&error];
         }
     }
 }
@@ -251,7 +255,7 @@
     }
 //    MPLog(@"heartbeat timeout times is: %d", self.hbTimeoutTimes);
     
-    if (self.hbTimeoutTimes > MPMaxHBTimeOutTimes) {
+    if (self.hbTimeoutTimes > [MPConfig defaultConfig].maxHBTimeOutTimes) {
         [self startConnect];
         self.hbTimeoutTimes = 0;
         return false;
@@ -287,7 +291,7 @@
     NSTimeInterval date = [[NSDate date] timeIntervalSince1970];
     
     // 发送握手数据
-    if (!sessionId || expireTime < date || ![hostAddress isEqualToString:PUSH_HOST_ADDRESS]) {
+    if (!sessionId || expireTime < date || ![hostAddress isEqualToString: [MPConfig defaultConfig].allotServer]) {
         [MPSessionStorage clearSession];
         return NO;
     } else{

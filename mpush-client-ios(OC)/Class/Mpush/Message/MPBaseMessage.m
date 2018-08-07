@@ -66,7 +66,7 @@
             if (result.length > 0) {
                 body = result;
                 [self.packet addFlag: MPFlagsCompress];
-            }
+            } 
         }
         
         // 2、加密
@@ -83,9 +83,8 @@
         }
         
         self.packet.body = body;
-        return [MPPacketEncoder encodePacket:self.packet];
     }
-    return nil;
+    return [MPPacketEncoder encodePacket:self.packet];
 }
 
 + (int)genRequestSessionId

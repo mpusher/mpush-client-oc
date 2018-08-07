@@ -24,6 +24,8 @@
 @property (nonatomic, assign)int aesKeyLength;
 @property (nonatomic, assign)int32_t compressLimit;
 
+@property (nonatomic, assign)int maxConnectTimes;
+@property (nonatomic, assign)int maxHBTimeOutTimes;
 @property (nonatomic, assign)BOOL logEnabled;
 @property (nonatomic, assign)BOOL enableHttpProxy;
 

@@ -10,9 +10,6 @@
 #import "RFIReader.h"
 
 
-@interface MPPacketDecoder()
-
-@end
 
 @implementation MPPacketDecoder
 
@@ -27,7 +24,7 @@
 + (MPPacket *)decodeHeartbeattWithData:(NSData *)data{
     RFIReader *reader = [[RFIReader alloc] initWithData:data];
     if ([reader readByte] == HB_PACKET_BYTE) {
-        MPPacket *packet = [[MPPacket alloc] initWithCmd:(MPCmdHeartbeat) andSessionId:0];
+        MPPacket *packet = [[MPPacket alloc]  initWithCmd:(MPCmdHeartbeat) andSessionId:0];
         return packet;
     }
     return nil;
