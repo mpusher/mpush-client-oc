@@ -7,8 +7,7 @@
 //
 
 #import "ViewController.h"
-#import "MPClient.h"
-
+#import "Mpush.h"
 
 
 
@@ -23,7 +22,6 @@
 
 /** 绑定的用户id  */
 @property(nonatomic,copy)NSString *userId;
-//@property (nonatomic, strong)MPMessageHandler *messageHandler;
 @property (nonatomic, strong)MPClient *mpClient;
 
 @property (weak, nonatomic) IBOutlet UITextField *allocerTextField;
@@ -34,7 +32,7 @@
 @property (weak, nonatomic) IBOutlet UIButton *unBindButton;
 @property (weak, nonatomic) IBOutlet UIButton *sendButton;
 
-@property (nonatomic, assign)int messageCount;
+//@property (nonatomic, assign)int messageCount;
 
 @end
 
@@ -50,7 +48,10 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    self.allocerTextField.text = [MPConfig defaultConfig].allotServer;
+    MPConfig *config = [MPConfig defaultConfig];
+    self.userFromTextField.text = config.userId;
+    self.userToTextField.text = config.toUserId;
+    self.allocerTextField.text = config.allotServer;
     self.allocerTextField.enabled = false;
     
     MPClient *client = [MPClient sharedClient];
@@ -74,7 +75,9 @@
 // 断开连接
 - (IBAction)didConnectBtnClick:(id)sender
 {
-    [self.mpClient disconnect];
+    if (self.mpClient.isRunning) {
+        [self.mpClient disconnect];
+    }
 }
 
 // 绑定用户
@@ -85,6 +88,7 @@
         return;
     }
     self.userId = userId;
+    [MPConfig defaultConfig].userId = userId;
     [self.mpClient bindUserWithUserId: self.userId];
 }
 // 解绑用户
@@ -117,13 +121,13 @@
     // PUSH_HOST_ADDRESS
     [self.messages addObject: message];
     [self messageTableViewReloadData];
-    self.messageTextField.text = nil;
 }
 - (void) messageTableViewReloadData{
     dispatch_async(dispatch_get_main_queue(), ^{
         [self.messageTableView reloadData];
         NSIndexPath *indexPath = [NSIndexPath indexPathForRow:self.messages.count-1 inSection:0];
         [self.messageTableView scrollToRowAtIndexPath:indexPath atScrollPosition:UITableViewScrollPositionBottom animated:YES];
+//        self.messageTextField.text = nil;
     });
 }
 
@@ -154,6 +158,7 @@
     UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:cellId];
     if (!cell) {
         cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:cellId];
+        cell.textLabel.font = [UIFont systemFontOfSize:10];
     }
     cell.textLabel.text = self.messages[indexPath.row];
     return cell;
@@ -162,9 +167,12 @@
 #pragma mark - MPClientDelegate
 -(void)client:(MPClient *)client onConnectedSock:(GCDAsyncSocket *)sock{
     MPLog(@"MPClientDelegate onConnectedSock");
+    
+    [self messageTableViewAddMessage:@"连接成功"];
 }
 - (void)client:(MPClient *)client onDisConnectedSock:(GCDAsyncSocket *)sock{
     MPLog(@"MPClientDelegate onDisConnectedSock");
+    [self messageTableViewAddMessage:@"断开连接"];
 }
 - (void)client:(MPClient *)client onHandshakeOk:(int32_t)heartbeat{
     MPLog(@"MPClientDelegate heartbeat: %d", heartbeat);
@@ -172,16 +180,21 @@
 
 - (void)client:(MPClient *)client onRecieveOkMsg:(MPOkMessage *)okMsg{
     MPLog(@"MPClientDelegate onRecieveOkMsg: %@",[okMsg debugDescription]);
+    
+    [self messageTableViewAddMessage:[NSString stringWithFormat:@"%@", [okMsg debugDescription]]];
 }
 - (void)client:(MPClient *)client onRecieveErrorMsg:(MPErrorMessage *)errorMsg{
     MPLog(@"MPClientDelegate onRecieveErrorMsg: %@",[errorMsg debugDescription]);
+    [self messageTableViewAddMessage:[NSString stringWithFormat:@"%@", [errorMsg debugDescription]]];
 }
 
 - (void)client:(MPClient *)client onRecievePushMsg:(MPPushMessage *)pushMessage{
     MPLog(@"[NSThread currentThread: %@] onRecievePushMsg pushMessage: %@",[NSThread currentThread] ,[pushMessage debugDescription]);
-    self.messageCount++;
-    MPLog(@"onRecievePushMsg: %d",self.messageCount);
     
+    [self messageTableViewAddMessage:[NSString stringWithFormat:@"接收消息：%@",pushMessage.contentDict[@"content"]]];
+    
+//    self.messageCount++;
+//    MPLog(@"onRecievePushMsg: %d",self.messageCount);
 }
 
 @end

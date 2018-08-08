@@ -10,9 +10,11 @@
 #define Mpush_h
 
 
+#import "MPClient.h"
+#import "MPConfig.h"
+
+
 #define MPUserDefaults  [NSUserDefaults standardUserDefaults]
-
-
 #ifdef DEBUG  //在调试模式下
 #define MPLog(fmt, ...) NSLog((@"[Line-%d] %s >>>>>>" fmt), __LINE__, __PRETTY_FUNCTION__,  ##__VA_ARGS__)
 #define MPInLog(fmt, ...) NSLog((@"[Line-%d] %s <<<<<<" fmt), __LINE__, __PRETTY_FUNCTION__,  ##__VA_ARGS__)

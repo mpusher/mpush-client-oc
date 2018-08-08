@@ -330,7 +330,6 @@
 		3937658721117845007FBC60 /* Message */ = {
 			isa = PBXGroup;
 			children = (
-				39ADFB5020030782003D4A1F /* Mpush.h */,
 				393765B82112FC23007FBC60 /* NSObject+MPDebugDescription.h */,
 				393765B92112FC23007FBC60 /* NSObject+MPDebugDescription.m */,
 				3937658821117845007FBC60 /* MPBaseMessage.h */,
@@ -370,6 +369,7 @@
 				3937656F21115FA7007FBC60 /* MPClient.m */,
 				39376565210EC87C007FBC60 /* MPConfig.h */,
 				39376566210EC87C007FBC60 /* MPConfig.m */,
+				39ADFB5020030782003D4A1F /* Mpush.h */,
 				3937657121117659007FBC60 /* MessageHandler */,
 				3937658721117845007FBC60 /* Message */,
 				39ADFB782003087D003D4A1F /* DataPacket */,

@@ -15,6 +15,7 @@
 #import "MPBindUserMessage.h"
 #import "MPHttpRequestMessage.h"
 #import "MPFastConnectMessage.h"
+#import "Mpush.h"
 
 /// 超时时间
 #define MPTimeOutIntervel 90
@@ -104,17 +105,17 @@
                 
             case AFNetworkReachabilityStatusNotReachable:
                 MPLog(@"can not connect");
-                [self.socket disconnect];
+                [self disconnect];
                 break;
                 
             case AFNetworkReachabilityStatusReachableViaWWAN:
                 MPLog(@"2G,3G,4G... network");
-                [self startConnect];
+                [self reConnect];
                 break;
                 
             case AFNetworkReachabilityStatusReachableViaWiFi:
                 MPLog(@"wifi  network");
-                [self startConnect];
+                [self reConnect];
                 break;
             default:
                 break;
@@ -123,7 +124,7 @@
     //开始监听
     [manager startMonitoring];
 }
-- (void)startConnect
+- (void)reConnect
 {
     // 连接
     NSError *error = nil;
@@ -167,9 +168,7 @@
         self.connectNum ++;
         if (_connectNum < [MPConfig defaultConfig].maxConnectTimes) {
             sleep(_connectNum+2);
-            NSError *error = nil;
-            MPConfig *config = [MPConfig defaultConfig];
-            [_socket connectToHost:config.serverHost onPort:config.serverPort error:&error];
+            [self reConnect];
         }
     }
 }
@@ -203,7 +202,9 @@
  */
 - (void)disconnect
 {
-    [self.socket disconnect];
+    if ([self isRunning]) {
+        [self.socket disconnect];
+    }
 }
 
 /**
@@ -256,7 +257,7 @@
 //    MPLog(@"heartbeat timeout times is: %d", self.hbTimeoutTimes);
     
     if (self.hbTimeoutTimes > [MPConfig defaultConfig].maxHBTimeOutTimes) {
-        [self startConnect];
+        [self reConnect];
         self.hbTimeoutTimes = 0;
         return false;
     }

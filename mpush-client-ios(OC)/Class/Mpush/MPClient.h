@@ -13,7 +13,6 @@
 #import "MPHttpResponseMessage.h"
 #import "MPPushMessage.h"
 #import "MPKickUserMessage.h"
-#import "Mpush.h"
 
 @class MPClient;
 
@@ -48,6 +47,7 @@
 
 - (void)connectToHost;
 - (void)disconnect;
+- (void)reConnect;
 - (BOOL)isRunning;
 - (BOOL)healthCheck;
 
