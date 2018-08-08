@@ -14,7 +14,7 @@
 
 
 - (instancetype)init{
-    self = [super initWithPacket:[[MPPacket alloc] initWithCmd:(MPCmdHandShake) andSessionId:[MPSessionStorage genSessionId]]];
+    self = [super initWithPacket:[[MPPacket alloc] initWithCmd:(MPCmdHandShake) andSessionId:[MPBaseMessage genRequestSessionId]]];
     if (self) {
         MPConfig *config = [MPConfig defaultConfig];
         self.deviceId = config.deviceId;

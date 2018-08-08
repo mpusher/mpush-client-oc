@@ -43,12 +43,12 @@
     [MPUserDefaults synchronize];
 }
 
-+ (int)genSessionId
-{
-    static atomic_int counter;
-    atomic_fetch_add_explicit(&counter, 1, memory_order_relaxed);
-    return counter;
-}
+//+ (int)genSessionId
+//{
+//    static atomic_int counter;
+//    atomic_fetch_add_explicit(&counter, 1, memory_order_relaxed);
+//    return counter;
+//}
 
 @end
 

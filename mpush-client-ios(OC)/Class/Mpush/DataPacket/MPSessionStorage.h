@@ -22,6 +22,6 @@
 + (void)saveSessionWithSessionId:(NSString *)sessionId andExpireTime:(double)expireTime;
 + (NSDictionary *)getSessionStorage;
 + (void)clearSession;
-+ (int)genSessionId;
+//+ (int)genSessionId;
 
 @end
