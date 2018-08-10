@@ -67,6 +67,9 @@
  发送完整包数据
  */
 - (void)sendMessageData:(NSData *)messageData;
-
+/**
+ 手动ack
+ */
+- (void)sendBizAckMessage:(MPPushMessage *)message;
 
 @end

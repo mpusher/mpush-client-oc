@@ -16,6 +16,7 @@
 #import "MPHttpRequestMessage.h"
 #import "MPFastConnectMessage.h"
 #import "Mpush.h"
+#import "MPAckMessage.h"
 
 /// 超时时间
 #define MPTimeOutIntervel 90
@@ -300,6 +301,12 @@
     }
 }
 
+- (void)bizAckMessage:(MPPushMessage *)message{
+    if ([message bizAck]) {
+        MPAckMessage *ackMessage = [[MPAckMessage alloc] initWithSessionId:message.getSessionId];
+        [self sendMessageData:[ackMessage encode]];
+    }
+}
 
 
 @end

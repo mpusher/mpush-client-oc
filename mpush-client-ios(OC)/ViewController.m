@@ -190,7 +190,6 @@
 
 - (void)client:(MPClient *)client onRecievePushMsg:(MPPushMessage *)pushMessage{
     MPLog(@"[NSThread currentThread: %@] onRecievePushMsg pushMessage: %@",[NSThread currentThread] ,[pushMessage debugDescription]);
-    
     [self messageTableViewAddMessage:[NSString stringWithFormat:@"接收消息：%@",pushMessage.contentDict[@"content"]]];
     
 //    self.messageCount++;

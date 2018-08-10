@@ -21,9 +21,7 @@
     if ([message autoAck]) {
         dispatch_async(dispatch_get_global_queue(0, 0), ^{
             MPAckMessage *ackMessage = [[MPAckMessage alloc] initWithSessionId:message.getSessionId];
-            MPLog(@"message.getSessionId: %d", message.getSessionId);
-            NSData *data = [ackMessage encode];
-            [client sendMessageData:data];
+            [client sendMessageData:[ackMessage encode]];
         });
     }
     if ([client.delegate respondsToSelector: @selector(client:onRecievePushMsg:)]) {
