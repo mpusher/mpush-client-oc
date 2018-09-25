@@ -70,7 +70,7 @@
         }
         
         // 2、加密
-        if (self.packet.cmd == MPCmdHandShake || self.packet.cmd == MPCmdFastConnect) {
+        if (self.packet.cmd == MPCmdHandShake) {
             NSData *encryptBody = [RSA encryptData:body publicKey: [MPConfig defaultConfig].publicKey];
             body = encryptBody;
             [self.packet addFlag:(MPFlagsCrypto)];

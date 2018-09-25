@@ -47,7 +47,7 @@
 
 - (void)connectToHost;
 - (void)disconnect;
-- (void)reConnect;
+- (void)reconnect;
 - (BOOL)isRunning;
 - (BOOL)healthCheck;
 

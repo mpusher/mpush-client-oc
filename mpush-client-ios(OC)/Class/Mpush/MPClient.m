@@ -17,6 +17,8 @@
 #import "MPFastConnectMessage.h"
 #import "Mpush.h"
 #import "MPAckMessage.h"
+#import "GSKeyChainDataManager.h"
+
 
 /// 超时时间
 #define MPTimeOutIntervel 90
@@ -59,11 +61,24 @@
 - (instancetype)initWithSocket:(GCDAsyncSocket *)socket
 {
     if (self == [super init]) {
+        [self saveUUID];
         socket.delegate = self;
         _socket = socket;
     }
     return self;
 }
+
+/**
+ *  保存UDID
+ */
+- (void)saveUUID{
+    NSString *udid = [GSKeyChainDataManager readUUID];
+    if (udid == nil) {
+        NSString *deviceUUID = [[UIDevice currentDevice].identifierForVendor UUIDString];
+        [GSKeyChainDataManager saveUUID:deviceUUID];
+    }
+}
+
 
 /**
  获取分配的 主机ip 和 端口号 并建立socket连接
@@ -111,12 +126,12 @@
                 
             case AFNetworkReachabilityStatusReachableViaWWAN:
                 MPLog(@"2G,3G,4G... network");
-                [self reConnect];
+                [self reconnect];
                 break;
                 
             case AFNetworkReachabilityStatusReachableViaWiFi:
                 MPLog(@"wifi  network");
-                [self reConnect];
+                [self reconnect];
                 break;
             default:
                 break;
@@ -125,7 +140,7 @@
     //开始监听
     [manager startMonitoring];
 }
-- (void)reConnect
+- (void)reconnect
 {
     // 连接
     NSError *error = nil;
@@ -169,7 +184,7 @@
         self.connectNum ++;
         if (_connectNum < [MPConfig defaultConfig].maxConnectTimes) {
             sleep(_connectNum+2);
-            [self reConnect];
+            [self reconnect];
         }
     }
 }
@@ -255,10 +270,8 @@
     }else {
         self.hbTimeoutTimes = 0;
     }
-//    MPLog(@"heartbeat timeout times is: %d", self.hbTimeoutTimes);
-    
     if (self.hbTimeoutTimes > [MPConfig defaultConfig].maxHBTimeOutTimes) {
-        [self reConnect];
+        [self reconnect];
         self.hbTimeoutTimes = 0;
         return false;
     }
@@ -301,7 +314,7 @@
     }
 }
 
-- (void)bizAckMessage:(MPPushMessage *)message{
+- (void)sendBizAckMessage:(MPPushMessage *)message{
     if ([message bizAck]) {
         MPAckMessage *ackMessage = [[MPAckMessage alloc] initWithSessionId:message.getSessionId];
         [self sendMessageData:[ackMessage encode]];

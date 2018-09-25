@@ -23,7 +23,9 @@
     RFIWriter *writer = [[RFIWriter alloc] initWithData:body];
     NSString *sessionId = [MPSessionStorage getSessionStorage][MPSessionId];
     [writer writeString:sessionId];
-    [writer writeString: [GSKeyChainDataManager readUUID]];
+    NSString *uuid = [GSKeyChainDataManager readUUID];
+    MPLog(@"uuid: %@", uuid);
+    [writer writeString: uuid];
     [writer writeInt32:[MPConfig defaultConfig].minHeartbeat];
     [writer writeInt32:[MPConfig defaultConfig].maxHeartbeat];
     

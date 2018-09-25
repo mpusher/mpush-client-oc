@@ -12,12 +12,14 @@
 
 @implementation MPConfig
 
+//        114.116.50.243:9999 imo2o_136923
 + (MPConfig *)defaultConfig{
     static MPConfig *config = nil;
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
         
         config = [[MPConfig alloc] init];
+//        103.60.220.145:9999 官
         config.allotServer = @"http://103.60.220.145:9999";
         config.userId = @"12345";
         config.toUserId = @"12345";

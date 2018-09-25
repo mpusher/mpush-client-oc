@@ -7,7 +7,6 @@
 //
 
 #import "AppDelegate.h"
-#import "GSKeyChainDataManager.h"
 
 @interface AppDelegate ()
 
@@ -18,20 +17,8 @@
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     // Override point for customization after application launch.
-    [self saveUUID];
     
     return YES;
-}
-
-/**
- *  保存UDID
- */
-- (void)saveUUID{
-    NSString *udid = [GSKeyChainDataManager readUUID];
-    if (udid == nil) {
-        NSString *deviceUUID = [[UIDevice currentDevice].identifierForVendor UUIDString];
-        [GSKeyChainDataManager saveUUID:deviceUUID];
-    }
 }
 
 

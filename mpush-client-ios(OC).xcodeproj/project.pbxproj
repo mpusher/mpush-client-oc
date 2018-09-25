@@ -556,6 +556,9 @@
 							com.apple.Keychain = {
 								enabled = 1;
 							};
+							com.apple.iCloud = {
+								enabled = 0;
+							};
 						};
 					};
 					0D591C4D1D741B910064A90C = {
@@ -815,8 +818,9 @@
 				CODE_SIGN_ENTITLEMENTS = "mpush-client-ios(OC)/mpush-client-ios(OC).entitlements";
 				DEVELOPMENT_TEAM = 9LW6A56WFN;
 				INFOPLIST_FILE = "mpush-client-ios(OC)/Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = "com.bicaijia.mpush-client-ios-OC-";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.mpush.mpush-client-oc";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
@@ -828,8 +832,9 @@
 				CODE_SIGN_ENTITLEMENTS = "mpush-client-ios(OC)/mpush-client-ios(OC).entitlements";
 				DEVELOPMENT_TEAM = 9LW6A56WFN;
 				INFOPLIST_FILE = "mpush-client-ios(OC)/Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = "com.bicaijia.mpush-client-ios-OC-";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.mpush.mpush-client-oc";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;
